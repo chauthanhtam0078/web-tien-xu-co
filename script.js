@@ -11,7 +11,9 @@ let hasAdminPrivilege = false;
 // Dữ liệu mẫu (nếu Google Sheet chưa có gì)
 const defaultProducts = [
     { id: "mock1", name: "Đồng Xu Khải Định 1 Đồng", price: "850.000đ", period: "Triều Nguyễn", years: "1916-1925", desc: "Tiền xu bằng đồng thời vua Khải Định, còn rõ nét chữ Hán và hoa văn rồng phụng cổ điển.", symbol: "宣", color: "text-brand-gold", images: [] },
-    { id: "mock2", name: "Bạch Kim Bảo Đại 5 Xu", price: "1.200.000đ", period: "Triều Nguyễn", years: "1925-1945", desc: "Xu bạch kim thời vua Bảo Đại, kích thước nhỏ, bề mặt còn lưu dấu ấn đúc tiền triều đình.", symbol: "統", color: "text-gray-500", images: [] }
+    { id: "mock2", name: "Bạch Kim Bảo Đại 5 Xu", price: "1.200.000đ", period: "Triều Nguyễn", years: "1925-1945", desc: "Xu bạch kim thời vua Bảo Đại, kích thước nhỏ, bề mặt còn lưu dấu ấn đúc tiền triều đình.", symbol: "統", color: "text-gray-500", images: [] },
+    { id: "mock3", name: "Đồng Tiền Tự Đức Thông Bảo", price: "650.000đ", period: "Triều Nguyễn", years: "1848-1883", desc: "Tiền xu đồng thời Tự Đức, bốn chữ 'Tự Đức Thông Bảo' xung quanh lỗ vuông trung tâm.", symbol: "嗣", color: "text-amber-700", images: [] },
+    { id: "mock4", name: "Đồng Xu Minh Mạng Thông Bảo", price: "980.000đ", period: "Triều Nguyễn", years: "1820-1841", desc: "Xu đồng thời Minh Mạng, một trong những triều đại hưng thịnh nhất, chất lượng đúc cao.", symbol: "明", color: "text-gray-600", images: [] }
 ];
 
 // ================= KHỞI TẠO & LẮNG NGHE SỰ KIỆN =================
