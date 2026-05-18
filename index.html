@@ -424,33 +424,34 @@
     <div id="orderModal" class="fixed inset-0 bg-black bg-opacity-70 z-[70] flex items-center justify-center p-4 opacity-0 pointer-events-none transition-opacity duration-300">
         <div class="bg-brand-bg w-[95vw] lg:w-[75vw] max-w-6xl border border-brand-gold shadow-2xl relative transform scale-95 transition-transform duration-300 rounded-md flex flex-col overflow-hidden max-h-[90vh]" id="modalContent">
             
-            <!-- Header Modal -->
-            <div class="p-4 md:p-5 border-b border-brand-border bg-white flex justify-between items-center relative z-20 shadow-sm">
+            <!-- Header Modal (Cố định trên cùng) -->
+            <div class="p-4 md:p-5 border-b border-brand-border bg-white flex justify-between items-center relative z-20 shadow-sm flex-shrink-0">
                 <h3 class="text-xl md:text-2xl font-serif font-bold text-brand-dark leading-tight">Thanh Toán Đơn Hàng</h3>
                 <button onclick="window.closeModal()" class="text-gray-500 hover:text-red-600 transition-colors bg-gray-100 hover:bg-gray-200 rounded-full p-1.5 shadow-sm">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
                 </button>
             </div>
             
-            <div class="flex flex-col lg:flex-row overflow-y-auto flex-grow relative z-10 w-full bg-brand-bg">
+            <!-- Phần thân Modal (Chứa 2 cột, cho phép cuộn độc lập) -->
+            <div class="flex flex-col lg:flex-row flex-grow overflow-hidden relative w-full bg-brand-bg">
                 
-                <!-- Cột Trái: Tóm tắt đơn hàng -->
-                <div class="lg:w-5/12 p-6 md:p-8 bg-brand-card border-b lg:border-b-0 lg:border-r border-brand-border flex flex-col">
-                    <h4 class="font-bold text-brand-dark mb-4 uppercase tracking-wider text-sm flex items-center gap-2">
+                <!-- Cột Trái: Tóm tắt đơn hàng (Có thể cuộn) -->
+                <div class="lg:w-5/12 p-6 md:p-8 bg-brand-card border-b lg:border-b-0 lg:border-r border-brand-border flex flex-col overflow-y-auto">
+                    <h4 class="font-bold text-brand-dark mb-4 uppercase tracking-wider text-sm flex items-center gap-2 flex-shrink-0">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-[#8c5a2b]" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" /></svg>
                         Sản phẩm đã chọn
                     </h4>
-                    <div id="orderSummaryItems" class="space-y-3 mb-6 flex-grow overflow-y-auto pr-2 custom-scrollbar">
+                    <div id="orderSummaryItems" class="space-y-3 mb-6 flex-grow overflow-y-auto pr-2">
                         <!-- JS renders items here -->
                     </div>
-                    <div class="border-t border-brand-border pt-4 flex justify-between items-end mt-auto">
+                    <div class="border-t border-brand-border pt-4 flex justify-between items-end mt-auto flex-shrink-0">
                         <span class="text-sm font-bold text-gray-600 uppercase tracking-wider">Tổng cộng:</span>
                         <span id="modalProductPrice" class="text-2xl font-sans font-bold text-red-800">0đ</span>
                     </div>
                 </div>
 
-                <!-- Cột Phải: Form nhập liệu & QR -->
-                <div class="lg:w-7/12 p-6 md:p-8 bg-brand-bg">
+                <!-- Cột Phải: Form nhập liệu & QR (Có thể cuộn) -->
+                <div class="lg:w-7/12 p-6 md:p-8 bg-brand-bg overflow-y-auto">
                     <form id="orderForm" onsubmit="window.submitOrder(event)" class="space-y-4">
                         <input type="hidden" id="hiddenProductName" name="product_name">
                         
@@ -498,15 +499,15 @@
                                 <p class="text-[11px] text-gray-500 mt-3 italic leading-relaxed">* Vui lòng kiểm tra đúng Tên trước khi chuyển khoản. Ghi chú chuyển tiền: SĐT của bạn.</p>
                             </div>
                         </div>
-
-                        <!-- Khung nút thanh toán đã được bao bọc cẩn thận để giữ lề -->
-                        <div class="pt-4 mt-2">
-                            <button id="submitOrderBtn" type="submit" class="w-full bg-brand-btn text-brand-gold font-bold py-3 hover:bg-black transition-colors shadow-lg uppercase tracking-wider text-sm rounded-full">
-                                ĐẶT HÀNG NGAY
-                            </button>
-                        </div>
                     </form>
                 </div>
+            </div>
+            
+            <!-- Footer Modal (Cố định dưới cùng chứa nút Submit) -->
+            <div class="p-4 md:p-5 border-t border-brand-border bg-white relative z-20 shadow-[0_-4px_10px_rgba(0,0,0,0.05)] flex-shrink-0 flex justify-center">
+                <button form="orderForm" id="submitOrderBtn" type="submit" class="w-full md:w-2/3 lg:w-1/2 bg-brand-btn text-brand-gold font-bold py-3 hover:bg-black transition-colors shadow-lg uppercase tracking-wider text-sm rounded-full">
+                    ĐẶT HÀNG NGAY
+                </button>
             </div>
         </div>
     </div>
