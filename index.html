@@ -435,7 +435,7 @@
             <div class="flex flex-col lg:flex-row overflow-y-auto flex-grow relative z-10 w-full bg-brand-bg">
                 
                 <!-- Cột Trái: Tóm tắt đơn hàng -->
-                <div class="lg:w-5/12 p-6 md:p-8 bg-brand-card border-r border-brand-border flex flex-col">
+                <div class="lg:w-5/12 p-6 md:p-8 bg-brand-card border-b lg:border-b-0 lg:border-r border-brand-border flex flex-col">
                     <h4 class="font-bold text-brand-dark mb-4 uppercase tracking-wider text-sm flex items-center gap-2">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-[#8c5a2b]" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" /></svg>
                         Sản phẩm đã chọn
@@ -450,40 +450,63 @@
                 </div>
 
                 <!-- Cột Phải: Form nhập liệu & QR -->
-                <div class="lg:w-7/12 p-6 md:p-8 bg-brand-bg">
-                    <form id="orderForm" onsubmit="window.submitOrder(event)" class="space-y-4">
+                <div class="lg:w-7/12 p-6 md:p-8 bg-brand-bg flex flex-col">
+                    <form id="orderForm" onsubmit="window.submitOrder(event)" class="space-y-4 flex flex-col h-full">
                         <input type="hidden" id="hiddenProductName" name="product_name">
                         
                         <div><input type="text" name="customer_name" required placeholder="Họ và Tên *" class="w-full px-4 py-2 text-sm border border-brand-border focus:ring-1 focus:ring-brand-gold outline-none rounded-sm"></div>
-                                <input type="radio" name="payment_method" value="BANK" onchange="window.togglePaymentInfo()" class="mt-1 accent-[#8c5a2b] w-4 h-4">
-                                <span class="text-sm">
-                                    <strong class="block text-gray-800 group-hover:text-[#8c5a2b] transition-colors">Chuyển khoản / Quét mã QR</strong>
-                                    <span class="text-[11px] text-gray-500 block mt-1 leading-relaxed">Thanh toán an toàn, quét mã QR qua App Ngân hàng nhanh chóng.</span>
-                                </span>
-                            </label>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div><input type="tel" name="phone" required placeholder="Số điện thoại *" class="w-full px-4 py-2 text-sm border border-brand-border focus:ring-1 focus:ring-brand-gold outline-none rounded-sm"></div>
+                            <div><input type="email" name="email" placeholder="Email (Tuỳ chọn)" class="w-full px-4 py-2 text-sm border border-brand-border focus:ring-1 focus:ring-brand-gold outline-none rounded-sm"></div>
                         </div>
-                    </div>
+                        <div><textarea name="address" required rows="2" placeholder="Địa chỉ giao hàng chi tiết *" class="w-full px-4 py-2 text-sm border border-brand-border focus:ring-1 focus:ring-brand-gold resize-none outline-none rounded-sm"></textarea></div>
+                        <div><textarea name="notes" rows="2" placeholder="Ghi chú đơn hàng (Tuỳ chọn)" class="w-full px-4 py-2 text-sm border border-brand-border focus:ring-1 focus:ring-brand-gold resize-none outline-none rounded-sm"></textarea></div>
 
-                    <!-- Khung quét mã QR -->
-                    <div id="bankInfoArea" class="hidden mt-4 p-5 bg-[#f8f5ee] border border-[#d8ccb8] rounded-sm text-center shadow-inner relative overflow-hidden">
-                        <div class="absolute inset-0 opacity-10 bg-[linear-gradient(#cda568_1px,transparent_1px),linear-gradient(90deg,#cda568_1px,transparent_1px)] bg-[size:15px_15px]"></div>
-                        <div class="relative z-10">
-                            <p class="text-xs text-[#8c5a2b] font-bold mb-3 uppercase tracking-wider"><span class="animate-pulse inline-block w-2 h-2 rounded-full bg-red-600 mr-1"></span>Quét mã để thanh toán ngay</p>
-                            <!-- Mã QR tự tạo API VietQR -->
-                            <img id="qrCodeImg" src="https://img.vietqr.io/image/tcb-0916694438-compact2.jpg" class="mx-auto w-40 h-40 border-4 border-white shadow-lg mb-4" alt="QR Code">
-                            <div class="text-xs text-gray-700 space-y-1.5 bg-white py-3 px-4 border border-gray-200 inline-block text-left rounded shadow-sm w-full">
-                                <p class="flex justify-between border-b border-gray-100 pb-1"><span>Ngân hàng:</span> <strong class="text-[#8c5a2b]">Techcombank</strong></p>
-                                <p class="flex justify-between border-b border-gray-100 pb-1 pt-1"><span>Số tài khoản:</span> <strong class="text-brand-dark">0916 694 438</strong></p>
-                                <p class="flex justify-between pt-1"><span>Chủ TK:</span> <strong>LE NGOC THANH</strong></p>
+                        <!-- Lựa chọn Thanh toán -->
+                        <div class="mt-4 border-t border-brand-border pt-5">
+                            <p class="text-sm font-bold text-brand-dark mb-3">Phương thức thanh toán:</p>
+                            <div class="space-y-3">
+                                <label class="flex items-start gap-3 cursor-pointer group p-3 border border-gray-200 rounded-sm hover:border-brand-gold transition-colors bg-white">
+                                    <input type="radio" name="payment_method" value="COD" checked onchange="window.togglePaymentInfo()" class="mt-1 accent-[#8c5a2b] w-4 h-4">
+                                    <span class="text-sm">
+                                        <strong class="block text-gray-800 group-hover:text-[#8c5a2b] transition-colors">Thanh toán khi nhận hàng (COD)</strong>
+                                        <span class="text-[11px] text-gray-500 block mt-1 leading-relaxed">Kiểm tra sản phẩm và thanh toán tiền mặt cho shipper khi nhận được hàng.</span>
+                                    </span>
+                                </label>
+                                <label class="flex items-start gap-3 cursor-pointer group p-3 border border-gray-200 rounded-sm hover:border-brand-gold transition-colors bg-white">
+                                    <input type="radio" name="payment_method" value="BANK" onchange="window.togglePaymentInfo()" class="mt-1 accent-[#8c5a2b] w-4 h-4">
+                                    <span class="text-sm">
+                                        <strong class="block text-gray-800 group-hover:text-[#8c5a2b] transition-colors">Chuyển khoản / Quét mã QR</strong>
+                                        <span class="text-[11px] text-gray-500 block mt-1 leading-relaxed">Thanh toán an toàn, quét mã QR qua App Ngân hàng nhanh chóng.</span>
+                                    </span>
+                                </label>
                             </div>
-                            <p class="text-[11px] text-gray-500 mt-3 italic leading-relaxed">* Vui lòng kiểm tra đúng Tên trước khi chuyển khoản. Ghi chú chuyển tiền: SĐT của bạn.</p>
                         </div>
-                    </div>
 
-                    <button id="submitOrderBtn" type="submit" class="w-full bg-brand-btn text-brand-gold font-bold py-3 mt-6 hover:bg-black transition-colors shadow-lg uppercase tracking-wider text-sm rounded-full">
-                        ĐẶT HÀNG NGAY
-                    </button>
-                </form>
+                        <!-- Khung quét mã QR -->
+                        <div id="bankInfoArea" class="hidden mt-4 p-5 bg-[#f8f5ee] border border-[#d8ccb8] rounded-sm text-center shadow-inner relative overflow-hidden">
+                            <div class="absolute inset-0 opacity-10 bg-[linear-gradient(#cda568_1px,transparent_1px),linear-gradient(90deg,#cda568_1px,transparent_1px)] bg-[size:15px_15px]"></div>
+                            <div class="relative z-10">
+                                <p class="text-xs text-[#8c5a2b] font-bold mb-3 uppercase tracking-wider"><span class="animate-pulse inline-block w-2 h-2 rounded-full bg-red-600 mr-1"></span>Quét mã để thanh toán ngay</p>
+                                <!-- Mã QR tự tạo API VietQR -->
+                                <img id="qrCodeImg" src="https://img.vietqr.io/image/tcb-0916694438-compact2.jpg" class="mx-auto w-40 h-40 border-4 border-white shadow-lg mb-4" alt="QR Code">
+                                <div class="text-xs text-gray-700 space-y-1.5 bg-white py-3 px-4 border border-gray-200 inline-block text-left rounded shadow-sm w-full">
+                                    <p class="flex justify-between border-b border-gray-100 pb-1"><span>Ngân hàng:</span> <strong class="text-[#8c5a2b]">Techcombank</strong></p>
+                                    <p class="flex justify-between border-b border-gray-100 pb-1 pt-1"><span>Số tài khoản:</span> <strong class="text-brand-dark">0916 694 438</strong></p>
+                                    <p class="flex justify-between pt-1"><span>Chủ TK:</span> <strong>LE NGOC THANH</strong></p>
+                                </div>
+                                <p class="text-[11px] text-gray-500 mt-3 italic leading-relaxed">* Vui lòng kiểm tra đúng Tên trước khi chuyển khoản. Ghi chú chuyển tiền: SĐT của bạn.</p>
+                            </div>
+                        </div>
+
+                        <!-- Khung nút thanh toán đã được bao bọc cẩn thận để giữ lề -->
+                        <div class="mt-auto pt-6">
+                            <button id="submitOrderBtn" type="submit" class="w-full bg-brand-btn text-brand-gold font-bold py-3 hover:bg-black transition-colors shadow-lg uppercase tracking-wider text-sm rounded-full">
+                                ĐẶT HÀNG NGAY
+                            </button>
+                        </div>
+                    </form>
+                </div>
             </div>
         </div>
     </div>
