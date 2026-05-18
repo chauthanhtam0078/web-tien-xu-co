@@ -450,8 +450,8 @@
                 </div>
 
                 <!-- Cột Phải: Form nhập liệu & QR -->
-                <div class="lg:w-7/12 p-6 md:p-8 bg-brand-bg flex flex-col">
-                    <form id="orderForm" onsubmit="window.submitOrder(event)" class="space-y-4 flex flex-col h-full">
+                <div class="lg:w-7/12 p-6 md:p-8 bg-brand-bg">
+                    <form id="orderForm" onsubmit="window.submitOrder(event)" class="space-y-4">
                         <input type="hidden" id="hiddenProductName" name="product_name">
                         
                         <div><input type="text" name="customer_name" required placeholder="Họ và Tên *" class="w-full px-4 py-2 text-sm border border-brand-border focus:ring-1 focus:ring-brand-gold outline-none rounded-sm"></div>
@@ -500,7 +500,7 @@
                         </div>
 
                         <!-- Khung nút thanh toán đã được bao bọc cẩn thận để giữ lề -->
-                        <div class="mt-auto pt-6">
+                        <div class="pt-4 mt-2">
                             <button id="submitOrderBtn" type="submit" class="w-full bg-brand-btn text-brand-gold font-bold py-3 hover:bg-black transition-colors shadow-lg uppercase tracking-wider text-sm rounded-full">
                                 ĐẶT HÀNG NGAY
                             </button>
