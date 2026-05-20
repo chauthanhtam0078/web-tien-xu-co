@@ -421,27 +421,43 @@
     </div>
 
     <!-- MODAL ĐẶT HÀNG (CẬP NHẬT GIAO DIỆN 75%) -->
-    <div id="orderModal" class="fixed inset-0 bg-black bg-opacity-70 z-[70] flex items-center justify-center p-4 opacity-0 pointer-events-none transition-opacity duration-300">
-        <div class="bg-brand-bg w-[95vw] lg:w-[75vw] max-w-6xl border border-brand-gold shadow-2xl relative transform scale-95 transition-transform duration-300 rounded-md flex flex-col overflow-hidden max-h-[90vh]" id="modalContent">
-            
+    <div id="orderModal"
+        class="fixed inset-0 bg-black bg-opacity-70 z-[70] flex items-center justify-center p-4 opacity-0 pointer-events-none transition-opacity duration-300">
+        <div class="bg-brand-bg w-[95vw] lg:w-[75vw] max-w-6xl border border-brand-gold shadow-2xl relative transform scale-95 transition-transform duration-300 rounded-md flex flex-col overflow-hidden max-h-[90vh]"
+            id="modalContent">
+
             <!-- Header Modal (Cố định trên cùng) -->
-            <div class="p-4 md:p-5 border-b border-brand-border bg-white flex justify-between items-center relative z-20 shadow-sm flex-shrink-0">
-                <h3 class="text-xl md:text-2xl font-serif font-bold text-brand-dark leading-tight">Thanh Toán Đơn Hàng</h3>
-                <button onclick="window.closeModal()" class="text-gray-500 hover:text-red-600 transition-colors bg-gray-100 hover:bg-gray-200 rounded-full p-1.5 shadow-sm">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+            <div
+                class="p-4 md:p-5 border-b border-brand-border bg-white flex justify-between items-center relative z-20 shadow-sm flex-shrink-0">
+                <h3 class="text-xl md:text-2xl font-serif font-bold text-brand-dark leading-tight">Thanh Toán Đơn Hàng
+                </h3>
+                <button onclick="window.closeModal()"
+                    class="text-gray-500 hover:text-red-600 transition-colors bg-gray-100 hover:bg-gray-200 rounded-full p-1.5 shadow-sm">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
+                        stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M6 18L18 6M6 6l12 12" />
+                    </svg>
                 </button>
             </div>
-            
+
             <!-- Phần thân Modal (Chứa 2 cột, cho phép cuộn độc lập) -->
             <div class="flex flex-col lg:flex-row flex-grow overflow-hidden relative w-full bg-brand-bg">
-                
+
                 <!-- Cột Trái: Tóm tắt đơn hàng (Có thể cuộn) -->
-                <div class="lg:w-5/12 p-6 md:p-8 bg-brand-card border-b lg:border-b-0 lg:border-r border-brand-border flex flex-col overflow-y-auto">
-                    <h4 class="font-bold text-brand-dark mb-4 uppercase tracking-wider text-sm flex items-center gap-2 flex-shrink-0">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-[#8c5a2b]" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" /></svg>
+                <!-- ĐÃ SỬA: Thêm flex-shrink-0, min-h-[35vh] và max-h-[45vh] để tối ưu hiển thị trên điện thoại -->
+                <div
+                    class="lg:w-5/12 p-6 md:p-8 bg-brand-card border-b lg:border-b-0 lg:border-r border-brand-border flex flex-col overflow-hidden flex-shrink-0 min-h-[35vh] max-h-[45vh] lg:min-h-0 lg:max-h-none lg:overflow-y-auto">
+                    <h4
+                        class="font-bold text-brand-dark mb-4 uppercase tracking-wider text-sm flex items-center gap-2 flex-shrink-0">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-[#8c5a2b]" fill="none"
+                            viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+                        </svg>
                         Sản phẩm đã chọn
                     </h4>
-                    <div id="orderSummaryItems" class="space-y-3 mb-6 flex-grow overflow-y-auto pr-2">
+                    <div id="orderSummaryItems" class="space-y-3 mb-6 flex-grow overflow-y-auto pr-2 custom-scrollbar">
                         <!-- JS renders items here -->
                     </div>
                     <div class="border-t border-brand-border pt-4 flex justify-between items-end mt-auto flex-shrink-0">
@@ -454,58 +470,91 @@
                 <div class="lg:w-7/12 p-6 md:p-8 bg-brand-bg overflow-y-auto">
                     <form id="orderForm" onsubmit="window.submitOrder(event)" class="space-y-4">
                         <input type="hidden" id="hiddenProductName" name="product_name">
-                        
-                        <div><input type="text" name="customer_name" required placeholder="Họ và Tên *" class="w-full px-4 py-2 text-sm border border-brand-border focus:ring-1 focus:ring-brand-gold outline-none rounded-sm"></div>
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div><input type="tel" name="phone" required placeholder="Số điện thoại *" class="w-full px-4 py-2 text-sm border border-brand-border focus:ring-1 focus:ring-brand-gold outline-none rounded-sm"></div>
-                            <div><input type="email" name="email" placeholder="Email (Tuỳ chọn)" class="w-full px-4 py-2 text-sm border border-brand-border focus:ring-1 focus:ring-brand-gold outline-none rounded-sm"></div>
+
+                        <div><input type="text" name="customer_name" required placeholder="Họ và Tên *"
+                                class="w-full px-4 py-2 text-sm border border-brand-border focus:ring-1 focus:ring-brand-gold outline-none rounded-sm">
                         </div>
-                        <div><textarea name="address" required rows="2" placeholder="Địa chỉ giao hàng chi tiết *" class="w-full px-4 py-2 text-sm border border-brand-border focus:ring-1 focus:ring-brand-gold resize-none outline-none rounded-sm"></textarea></div>
-                        <div><textarea name="notes" rows="2" placeholder="Ghi chú đơn hàng (Tuỳ chọn)" class="w-full px-4 py-2 text-sm border border-brand-border focus:ring-1 focus:ring-brand-gold resize-none outline-none rounded-sm"></textarea></div>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div><input type="tel" name="phone" required placeholder="Số điện thoại *"
+                                    class="w-full px-4 py-2 text-sm border border-brand-border focus:ring-1 focus:ring-brand-gold outline-none rounded-sm">
+                            </div>
+                            <div><input type="email" name="email" placeholder="Email (Tuỳ chọn)"
+                                    class="w-full px-4 py-2 text-sm border border-brand-border focus:ring-1 focus:ring-brand-gold outline-none rounded-sm">
+                            </div>
+                        </div>
+                        <div><textarea name="address" required rows="2" placeholder="Địa chỉ giao hàng chi tiết *"
+                                class="w-full px-4 py-2 text-sm border border-brand-border focus:ring-1 focus:ring-brand-gold resize-none outline-none rounded-sm"></textarea>
+                        </div>
+                        <div><textarea name="notes" rows="2" placeholder="Ghi chú đơn hàng (Tuỳ chọn)"
+                                class="w-full px-4 py-2 text-sm border border-brand-border focus:ring-1 focus:ring-brand-gold resize-none outline-none rounded-sm"></textarea>
+                        </div>
 
                         <!-- Lựa chọn Thanh toán -->
                         <div class="mt-4 border-t border-brand-border pt-5">
                             <p class="text-sm font-bold text-brand-dark mb-3">Phương thức thanh toán:</p>
                             <div class="space-y-3">
-                                <label class="flex items-start gap-3 cursor-pointer group p-3 border border-gray-200 rounded-sm hover:border-brand-gold transition-colors bg-white">
-                                    <input type="radio" name="payment_method" value="COD" checked onchange="window.togglePaymentInfo()" class="mt-1 accent-[#8c5a2b] w-4 h-4">
+                                <label
+                                    class="flex items-start gap-3 cursor-pointer group p-3 border border-gray-200 rounded-sm hover:border-brand-gold transition-colors bg-white">
+                                    <input type="radio" name="payment_method" value="COD" checked
+                                        onchange="window.togglePaymentInfo()" class="mt-1 accent-[#8c5a2b] w-4 h-4">
                                     <span class="text-sm">
-                                        <strong class="block text-gray-800 group-hover:text-[#8c5a2b] transition-colors">Thanh toán khi nhận hàng (COD)</strong>
-                                        <span class="text-[11px] text-gray-500 block mt-1 leading-relaxed">Kiểm tra sản phẩm và thanh toán tiền mặt cho shipper khi nhận được hàng.</span>
+                                        <strong
+                                            class="block text-gray-800 group-hover:text-[#8c5a2b] transition-colors">Thanh
+                                            toán khi nhận hàng (COD)</strong>
+                                        <span class="text-[11px] text-gray-500 block mt-1 leading-relaxed">Kiểm tra sản
+                                            phẩm và thanh toán tiền mặt cho shipper khi nhận được hàng.</span>
                                     </span>
                                 </label>
-                                <label class="flex items-start gap-3 cursor-pointer group p-3 border border-gray-200 rounded-sm hover:border-brand-gold transition-colors bg-white">
-                                    <input type="radio" name="payment_method" value="BANK" onchange="window.togglePaymentInfo()" class="mt-1 accent-[#8c5a2b] w-4 h-4">
+                                <label
+                                    class="flex items-start gap-3 cursor-pointer group p-3 border border-gray-200 rounded-sm hover:border-brand-gold transition-colors bg-white">
+                                    <input type="radio" name="payment_method" value="BANK"
+                                        onchange="window.togglePaymentInfo()" class="mt-1 accent-[#8c5a2b] w-4 h-4">
                                     <span class="text-sm">
-                                        <strong class="block text-gray-800 group-hover:text-[#8c5a2b] transition-colors">Chuyển khoản / Quét mã QR</strong>
-                                        <span class="text-[11px] text-gray-500 block mt-1 leading-relaxed">Thanh toán an toàn, quét mã QR qua App Ngân hàng nhanh chóng.</span>
+                                        <strong
+                                            class="block text-gray-800 group-hover:text-[#8c5a2b] transition-colors">Chuyển
+                                            khoản / Quét mã QR</strong>
+                                        <span class="text-[11px] text-gray-500 block mt-1 leading-relaxed">Thanh toán an
+                                            toàn, quét mã QR qua App Ngân hàng nhanh chóng.</span>
                                     </span>
                                 </label>
                             </div>
                         </div>
 
                         <!-- Khung quét mã QR -->
-                        <div id="bankInfoArea" class="hidden mt-4 p-5 bg-[#f8f5ee] border border-[#d8ccb8] rounded-sm text-center shadow-inner relative overflow-hidden">
-                            <div class="absolute inset-0 opacity-10 bg-[linear-gradient(#cda568_1px,transparent_1px),linear-gradient(90deg,#cda568_1px,transparent_1px)] bg-[size:15px_15px]"></div>
+                        <div id="bankInfoArea"
+                            class="hidden mt-4 p-5 bg-[#f8f5ee] border border-[#d8ccb8] rounded-sm text-center shadow-inner relative overflow-hidden">
+                            <div
+                                class="absolute inset-0 opacity-10 bg-[linear-gradient(#cda568_1px,transparent_1px),linear-gradient(90deg,#cda568_1px,transparent_1px)] bg-[size:15px_15px]">
+                            </div>
                             <div class="relative z-10">
-                                <p class="text-xs text-[#8c5a2b] font-bold mb-3 uppercase tracking-wider"><span class="animate-pulse inline-block w-2 h-2 rounded-full bg-red-600 mr-1"></span>Quét mã để thanh toán ngay</p>
+                                <p class="text-xs text-[#8c5a2b] font-bold mb-3 uppercase tracking-wider"><span
+                                        class="animate-pulse inline-block w-2 h-2 rounded-full bg-red-600 mr-1"></span>Quét
+                                    mã để thanh toán ngay</p>
                                 <!-- Mã QR tự tạo API VietQR -->
-                                <img id="qrCodeImg" src="https://img.vietqr.io/image/tcb-0916694438-compact2.jpg" class="mx-auto w-40 h-40 border-4 border-white shadow-lg mb-4" alt="QR Code">
-                                <div class="text-xs text-gray-700 space-y-1.5 bg-white py-3 px-4 border border-gray-200 inline-block text-left rounded shadow-sm w-full">
-                                    <p class="flex justify-between border-b border-gray-100 pb-1"><span>Ngân hàng:</span> <strong class="text-[#8c5a2b]">Techcombank</strong></p>
-                                    <p class="flex justify-between border-b border-gray-100 pb-1 pt-1"><span>Số tài khoản:</span> <strong class="text-brand-dark">0916 694 438</strong></p>
-                                    <p class="flex justify-between pt-1"><span>Chủ TK:</span> <strong>LE NGOC THANH</strong></p>
+                                <img id="qrCodeImg" src="https://img.vietqr.io/image/tcb-0916694438-compact2.jpg"
+                                    class="mx-auto w-40 h-40 border-4 border-white shadow-lg mb-4" alt="QR Code">
+                                <div
+                                    class="text-xs text-gray-700 space-y-1.5 bg-white py-3 px-4 border border-gray-200 inline-block text-left rounded shadow-sm w-full">
+                                    <p class="flex justify-between border-b border-gray-100 pb-1"><span>Ngân
+                                            hàng:</span> <strong class="text-[#8c5a2b]">Techcombank</strong></p>
+                                    <p class="flex justify-between border-b border-gray-100 pb-1 pt-1"><span>Số tài
+                                            khoản:</span> <strong class="text-brand-dark">0916 694 438</strong></p>
+                                    <p class="flex justify-between pt-1"><span>Chủ TK:</span> <strong>LE NGOC
+                                            THANH</strong></p>
                                 </div>
-                                <p class="text-[11px] text-gray-500 mt-3 italic leading-relaxed">* Vui lòng kiểm tra đúng Tên trước khi chuyển khoản. Ghi chú chuyển tiền: SĐT của bạn.</p>
+                                <p class="text-[11px] text-gray-500 mt-3 italic leading-relaxed">* Vui lòng kiểm tra
+                                    đúng Tên trước khi chuyển khoản. Ghi chú chuyển tiền: SĐT của bạn.</p>
                             </div>
                         </div>
                     </form>
                 </div>
             </div>
-            
+
             <!-- Footer Modal (Cố định dưới cùng chứa nút Submit) -->
-            <div class="p-4 md:p-5 border-t border-brand-border bg-white relative z-20 shadow-[0_-4px_10px_rgba(0,0,0,0.05)] flex-shrink-0 flex justify-center">
-                <button form="orderForm" id="submitOrderBtn" type="submit" class="w-full md:w-2/3 lg:w-1/2 bg-brand-btn text-brand-gold font-bold py-3 hover:bg-black transition-colors shadow-lg uppercase tracking-wider text-sm rounded-full">
+            <div
+                class="p-4 md:p-5 border-t border-brand-border bg-white relative z-20 shadow-[0_-4px_10px_rgba(0,0,0,0.05)] flex-shrink-0 flex justify-center">
+                <button form="orderForm" id="submitOrderBtn" type="submit"
+                    class="w-full md:w-2/3 lg:w-1/2 bg-brand-btn text-brand-gold font-bold py-3 hover:bg-black transition-colors shadow-lg uppercase tracking-wider text-sm rounded-full">
                     ĐẶT HÀNG NGAY
                 </button>
             </div>
