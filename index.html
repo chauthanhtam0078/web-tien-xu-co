@@ -1,44 +1,43 @@
 <!DOCTYPE html>
 <html lang="vi">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Tiền Xu Cổ Việt Nam</title>
-    
+
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
-    
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
     <script>
         tailwind.config = {
             theme: {
                 extend: {
                     colors: {
-                        'brand-dark': '#1c1612',
-                        'brand-gold': '#cda568',
-                        'brand-gold-light': '#e8ce9d', 
-                        'brand-bg': '#f8f5ee',
-                        'brand-card': '#efe8d7',
-                        'brand-btn': '#17110c',
-                        'brand-border': '#d8ccb8',
+                        'brand-dark': '#1c1612', 'brand-gold': '#cda568', 'brand-gold-light': '#e8ce9d',
+                        'brand-bg': '#f8f5ee', 'brand-card': '#efe8d7', 'brand-btn': '#17110c', 'brand-border': '#d8ccb8',
                     },
                     fontFamily: {
-                        'serif': ['"Playfair Display"', 'serif'],
-                        'sans': ['Inter', 'sans-serif'],
+                        'serif': ['"Playfair Display"', 'serif'], 'sans': ['Inter', 'sans-serif'],
                     }
                 }
             }
         }
     </script>
-    <link rel="stylesheet" href="./style.css">
+    <link rel="stylesheet" href="./css/style.css">
 </head>
-<body class="antialiased min-h-screen flex flex-col">
 
-    <!-- NAVIGATION BAR -->
-    <nav class="bg-white border-b border-gray-200 py-3 relative z-20 shadow-sm">
-        <div class="container mx-auto px-4 max-w-7xl flex flex-col md:flex-row justify-between items-center gap-4">
-            
+<body class="antialiased min-h-screen flex flex-col w-full overflow-x-hidden">
+
+    <!-- Container cho Custom Toasts -->
+    <div id="toastContainer" class="fixed top-24 right-4 z-[100] flex flex-col gap-3 pointer-events-none"></div>
+
+    <nav class="bg-white border-b border-gray-200 py-3 relative z-20 shadow-sm w-full">
+        <div class="w-full px-4 md:px-8 xl:px-12 2xl:px-16 mx-auto flex flex-col md:flex-row justify-between items-center gap-4">
+
             <div class="flex-shrink-0 w-full md:w-auto flex justify-center md:justify-start cursor-pointer" onclick="window.switchPage('home')">
                 <div class="flex items-center gap-3 group">
                     <div class="relative flex items-center justify-center w-14 h-14 bg-brand-dark rounded-full border-[3px] border-brand-gold shadow-md group-hover:rotate-90 transition-transform duration-700">
@@ -49,7 +48,7 @@
                         <span class="absolute left-[4px] text-[10px] text-brand-gold font-bold z-10">越</span>
                         <span class="absolute right-[4px] text-[10px] text-brand-gold font-bold z-10">南</span>
                     </div>
-                    <div class="flex flex-col justify-center">
+                    <div class="flex flex-col justify-center text-center md:text-left">
                         <span class="font-serif font-extrabold text-2xl text-[#8c5a2b] leading-none tracking-widest drop-shadow-sm uppercase">Văn Minh Việt Sử Hội</span>
                         <span class="font-serif italic text-[13px] text-[#d5a044] leading-tight mt-1 font-semibold">Tiền Xu Cổ Việt Nam</span>
                     </div>
@@ -59,8 +58,8 @@
             <div class="flex flex-col items-center md:items-end min-w-0 w-full md:w-auto gap-3">
                 <div class="flex flex-col sm:flex-row items-center gap-4 w-full sm:w-auto min-w-0">
                     <div class="relative w-full sm:w-80 min-w-0">
-                        <input type="text" placeholder="Tiền xu phong thuỷ..." class="w-full min-w-0 pl-4 pr-10 py-2 rounded-full border border-gray-300 focus:outline-none focus:border-[#eeb135] text-sm">
-                        <span class="absolute right-4 top-2.5 text-gray-700 font-bold cursor-pointer">
+                        <input type="text" id="searchInput" placeholder="Tiền xu phong thuỷ..." class="w-full min-w-0 pl-4 pr-10 py-2 rounded-full border border-gray-300 focus:outline-none focus:border-[#eeb135] text-sm">
+                        <span class="absolute right-4 top-2.5 text-gray-700 font-bold cursor-pointer hover:text-[#d5a044]" onclick="window.executeSearch()">
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
                         </span>
                     </div>
@@ -70,7 +69,6 @@
                             Hotline <strong class="text-base tracking-wide">0916 694 438</strong>
                         </div>
 
-                        <!-- NÚT GIỎ HÀNG -->
                         <button type="button" onclick="window.toggleCartModal()" class="relative w-10 h-10 rounded-full border border-brand-border bg-white text-brand-dark hover:bg-brand-gold hover:text-white transition-colors flex items-center justify-center shadow-sm" title="Giỏ hàng của bạn">
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" /></svg>
                             <span id="cartBadge" class="absolute -top-1 -right-1 bg-red-600 text-white text-[10px] font-bold w-4 h-4 flex items-center justify-center rounded-full hidden">0</span>
@@ -89,27 +87,22 @@
         </div>
     </nav>
 
-    <!-- KHOẢNG CHỨA LOADING -->
     <div id="loadingIndicator" class="py-20 text-center">
         <div class="loader mb-4"></div>
         <p class="text-gray-500 font-medium">Đang đồng bộ dữ liệu...</p>
     </div>
 
-    <!-- CONTAINER PUBLIC CHỨA CÁC TRANG -->
-    <div id="publicContainer" class="flex-grow hidden">
-        
-        <!-- ================= TRANG CHỦ ================= -->
-        <section id="view-home" class="page-view">
-            <header class="bg-gradient-to-b from-[#15100d] to-[#3a2e25] text-brand-gold py-16 text-center shadow-lg relative z-10 overflow-hidden">
+    <div id="publicContainer" class="flex-grow hidden w-full">
+
+        <section id="view-home" class="page-view w-full">
+            <header class="w-full bg-gradient-to-b from-[#15100d] to-[#3a2e25] text-brand-gold py-16 text-center shadow-lg relative z-10 overflow-hidden">
                 <div class="absolute inset-0 opacity-15 bg-[linear-gradient(#cda568_1px,transparent_1px),linear-gradient(90deg,#cda568_1px,transparent_1px)] bg-[size:40px_40px] pointer-events-none"></div>
                 <div class="absolute inset-0 bg-gradient-to-b from-brand-dark via-brand-dark/90 to-transparent pointer-events-none"></div>
-                
-                <div class="relative z-10">
+
+                <div class="relative z-10 w-full px-4">
                     <h1 class="text-3xl md:text-5xl font-bold font-serif mb-2 tracking-wide">VĂN MINH VIỆT SỬ HỘI</h1>
                     <h2 class="text-2xl md:text-4xl font-bold font-serif italic mb-6">Tiền Xu Cổ Việt Nam</h2>
-                    <p class="text-brand-gold-light text-sm md:text-base tracking-widest uppercase mb-10 opacity-80">
-                        Hiện vật lịch sử – Chính hãng – Có giấy tờ chứng nhận
-                    </p>
+                    <p class="text-brand-gold-light text-sm md:text-base tracking-widest uppercase mb-10 opacity-80">Hiện vật lịch sử – Chính hãng – Có giấy tờ chứng nhận</p>
                     <div class="inline-flex items-center justify-center w-20 h-20 rounded-full border border-brand-gold border-opacity-50 mx-auto relative cursor-pointer hover:scale-105 transition-transform" onclick="window.switchPage('products')">
                         <div class="absolute inset-2 rounded-full border border-brand-gold opacity-30"></div>
                         <span class="font-serif text-2xl font-bold">古</span>
@@ -117,14 +110,14 @@
                 </div>
             </header>
 
-            <div class="container mx-auto px-4 py-16 max-w-7xl">
+            <div class="w-full mx-auto px-4 md:px-8 xl:px-12 2xl:px-16 py-16">
                 <div class="text-center mb-12">
                     <p class="text-gray-500 uppercase tracking-widest text-xs font-semibold mb-2">Bộ sưu tập</p>
                     <h3 class="text-3xl font-serif font-bold text-brand-dark">Sản Phẩm Nổi Bật</h3>
                 </div>
-                
-                <div id="featuredProductGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6"></div>
-                
+
+                <div id="featuredProductGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 2xl:grid-cols-5 gap-6"></div>
+
                 <div class="text-center mt-10">
                     <button onclick="window.switchPage('products')" class="border-2 border-brand-gold text-[#8c5a2b] font-bold py-2 px-8 hover:bg-brand-gold hover:text-white transition-colors uppercase text-sm tracking-wider rounded-full shadow-sm">
                         Xem tất cả sản phẩm ➔
@@ -132,8 +125,8 @@
                 </div>
             </div>
 
-            <div class="bg-white py-12 border-t border-brand-border">
-                <div class="container mx-auto px-4 max-w-5xl text-center">
+            <div class="bg-white w-full py-12 border-t border-brand-border">
+                <div class="w-full mx-auto px-4 md:px-8 xl:px-12 max-w-5xl text-center">
                     <h3 class="text-3xl font-serif font-bold text-brand-dark mb-6">Về Chúng Tôi</h3>
                     <p class="text-gray-600 mb-8 leading-relaxed max-w-3xl mx-auto">
                         Sưu tầm tiền cổ không chỉ là một thú vui, mà còn là hành trình gìn giữ những mảnh ghép lịch sử vô giá của dân tộc. Tại đây, chúng tôi cam kết cung cấp những đồng tiền xu cổ Việt Nam chính hãng, được thẩm định kỹ lưỡng, mang lại giá trị sưu tầm và phong thủy cao nhất cho khách hàng.
@@ -145,48 +138,44 @@
             </div>
         </section>
 
-        <!-- ================= TRANG SẢN PHẨM ================= -->
-        <section id="view-products" class="page-view hidden container mx-auto px-4 py-12 max-w-7xl">
+        <section id="view-products" class="page-view hidden w-full mx-auto px-4 md:px-8 xl:px-12 2xl:px-16 py-12">
             <div class="mb-10 text-center border-b border-brand-border pb-6">
                 <h2 class="text-3xl font-serif font-bold text-brand-dark">Tất Cả Sản Phẩm</h2>
                 <p class="text-gray-500 mt-2">Khám phá bộ sưu tập tiền cổ đa dạng các triều đại</p>
             </div>
-            <div id="allProductGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6"></div>
+            <div id="allProductGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 2xl:grid-cols-5 gap-6"></div>
         </section>
 
-        <!-- ================= TRANG GIỚI THIỆU ================= -->
-        <section id="view-about" class="page-view hidden container mx-auto px-4 py-12 max-w-5xl">
+        <section id="view-search" class="page-view hidden w-full mx-auto px-4 md:px-8 xl:px-12 2xl:px-16 py-12">
+            <div class="mb-10 text-center border-b border-brand-border pb-6">
+                <h2 class="text-3xl font-serif font-bold text-brand-dark">Kết Quả Tìm Kiếm</h2>
+                <p id="searchCountDesc" class="text-gray-500 mt-2">Đang tìm kiếm...</p>
+            </div>
+
+            <h3 class="text-xl font-serif font-bold text-[#8c5a2b] mb-4 border-l-4 border-[#8c5a2b] pl-3">Sản Phẩm Cổ</h3>
+            <div id="searchProductGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 2xl:grid-cols-5 gap-6 mb-12"></div>
+
+            <h3 class="text-xl font-serif font-bold text-[#8c5a2b] mb-4 border-l-4 border-[#8c5a2b] pl-3">Tin Tức / Bài Viết</h3>
+            <div id="searchNewsGrid" class="grid grid-cols-1 md:grid-cols-3 xl:grid-cols-4 gap-8"></div>
+        </section>
+
+        <section id="view-about" class="page-view hidden w-full mx-auto px-4 md:px-8 xl:px-12 2xl:px-16 py-12 max-w-[1200px]">
             <h2 class="text-3xl font-serif font-bold text-brand-dark mb-8 text-center border-b border-brand-border pb-6">Giới Thiệu</h2>
             <div id="aboutContainer" class="grid grid-cols-1 md:grid-cols-2 gap-10 items-center"></div>
         </section>
 
-        <!-- ================= TRANG TIN TỨC ================= -->
-        <section id="view-news" class="page-view hidden container mx-auto px-4 py-12 max-w-7xl">
+        <section id="view-news" class="page-view hidden w-full mx-auto px-4 md:px-8 xl:px-12 2xl:px-16 py-12">
             <h2 class="text-3xl font-serif font-bold text-brand-dark mb-8 text-center border-b border-brand-border pb-6">Tin Tức & Kiến Thức</h2>
-            <div id="newsContainer" class="grid grid-cols-1 md:grid-cols-3 gap-8"></div>
+            <div id="newsContainer" class="grid grid-cols-1 md:grid-cols-3 xl:grid-cols-4 gap-8"></div>
         </section>
 
-        <!-- ================= TRANG LIÊN HỆ ================= -->
-        <section id="view-contact" class="page-view hidden container mx-auto px-4 py-12 max-w-5xl">
+        <section id="view-contact" class="page-view hidden w-full mx-auto px-4 md:px-8 xl:px-12 2xl:px-16 py-12 max-w-[1200px]">
             <h2 class="text-3xl font-serif font-bold text-brand-dark mb-8 text-center border-b border-brand-border pb-6">Liên Hệ Với Chúng Tôi</h2>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-10 bg-white p-8 border border-gray-200 shadow-sm rounded-sm">
                 <div>
                     <h3 class="text-xl font-bold text-[#8c5a2b] mb-6">Thông tin hỗ trợ</h3>
-                    <ul class="space-y-4 text-sm text-gray-700">
-                        <li class="flex items-start gap-3">
-                            <span class="text-xl">📍</span>
-                            <div><strong>Địa chỉ:</strong><br>Rạch Giá - An Giang</div>
-                        </li>
-                        <li class="flex items-start gap-3">
-                            <span class="text-xl">📞</span>
-                            <div><strong>Hotline/Zalo:</strong><br><span class="text-[#eeb135] font-bold text-lg">0916 694 438</span></div>
-                        </li>
-                        <li class="flex items-start gap-3">
-                            <span class="text-xl">✉️</span>
-                            <div><strong>Email:</strong><br>thanhln2@techcombank.com.vn</div>
-                        </li>
-                    </ul>
-                    
+                    <ul id="contactContainer" class="space-y-4 text-sm text-gray-700"></ul>
+
                     <div class="mt-8 bg-[#efe8d7] h-48 flex flex-col items-center justify-center border border-[#d8ccb8] rounded-sm relative overflow-hidden shadow-inner group">
                         <div class="absolute inset-0 opacity-20 bg-[linear-gradient(#cda568_1px,transparent_1px),linear-gradient(90deg,#cda568_1px,transparent_1px)] bg-[size:20px_20px]"></div>
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 mb-2 relative z-10 text-[#8c5a2b] drop-shadow-md group-hover:-translate-y-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -198,16 +187,10 @@
                 </div>
                 <div>
                     <h3 class="text-xl font-bold text-[#8c5a2b] mb-6">Gửi tin nhắn</h3>
-                    <form class="space-y-4" onsubmit="event.preventDefault(); alert('Tin nhắn của bạn đã được gửi. Chúng tôi sẽ phản hồi sớm nhất!'); this.reset();">
-                        <div>
-                            <input type="text" placeholder="Họ và tên của bạn" required class="w-full px-4 py-2 border border-gray-300 focus:outline-none focus:border-[#d5a044] rounded-sm">
-                        </div>
-                        <div>
-                            <input type="text" placeholder="Số điện thoại" required class="w-full px-4 py-2 border border-gray-300 focus:outline-none focus:border-[#d5a044] rounded-sm">
-                        </div>
-                        <div>
-                            <textarea rows="4" placeholder="Nội dung cần tư vấn..." required class="w-full px-4 py-2 border border-gray-300 focus:outline-none focus:border-[#d5a044] resize-none rounded-sm"></textarea>
-                        </div>
+                    <form class="space-y-4" onsubmit="event.preventDefault(); window.showToast('Tin nhắn của bạn đã được gửi. Chúng tôi sẽ phản hồi sớm nhất!', 'success'); this.reset();">
+                        <div><input type="text" placeholder="Họ và tên của bạn" required class="w-full px-4 py-2 border border-gray-300 focus:outline-none focus:border-[#d5a044] rounded-sm"></div>
+                        <div><input type="text" placeholder="Số điện thoại" required class="w-full px-4 py-2 border border-gray-300 focus:outline-none focus:border-[#d5a044] rounded-sm"></div>
+                        <div><textarea rows="4" placeholder="Nội dung cần tư vấn..." required class="w-full px-4 py-2 border border-gray-300 focus:outline-none focus:border-[#d5a044] resize-none rounded-sm"></textarea></div>
                         <button type="submit" class="w-full bg-[#1c1612] text-brand-gold font-bold py-3 hover:bg-[#d5a044] hover:text-white transition-colors uppercase text-sm rounded-full shadow-md">
                             Gửi Liên Hệ
                         </button>
@@ -218,112 +201,102 @@
 
     </div>
 
-    <!-- ADMIN SECTION -->
-    <main id="adminSection" class="flex-grow container mx-auto px-4 py-12 max-w-7xl hidden bg-white rounded-lg shadow-xl mt-8 border-t-4 border-brand-gold">
-        <div class="flex justify-between items-center mb-6 border-b pb-4">
+    <!-- KHU VỰC ADMIN -->
+    <main id="adminSection" class="flex-grow w-full mx-auto px-4 md:px-8 xl:px-12 2xl:px-16 py-12 hidden bg-white rounded-lg shadow-xl mt-8 border-t-4 border-brand-gold max-w-full">
+        <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center mb-6 border-b pb-4 gap-4">
             <div>
-                <h2 class="text-2xl font-serif font-bold text-brand-dark">Bảng Điều Khiển Admin</h2>
-                <p class="text-sm text-gray-500 mt-1">Nơi quản lý dữ liệu hiển thị ra website.</p>
+                <h2 class="text-2xl font-serif font-bold text-brand-dark flex items-center gap-2">
+                    <span id="adminWelcomeName">Bảng Điều Khiển Admin</span>
+                </h2>
+                <p class="text-sm text-gray-500 mt-1">Hệ quản trị nội dung tự động đồng bộ Google Sheets.</p>
             </div>
-            <button onclick="window.toggleAdmin()" class="bg-gray-100 hover:bg-gray-200 text-gray-800 px-4 py-2 rounded-full transition font-medium text-sm border shadow-sm">
-                Trở về Giao diện Web
-            </button>
+            
+            <div class="flex flex-wrap items-center gap-3 w-full lg:w-auto justify-end">
+                <div class="relative flex-grow lg:flex-grow-0 min-w-[200px]">
+                    <input type="text" id="adminLocalSearch" onkeyup="window.handleAdminSearch()" placeholder="Tìm trong Tab này..." class="w-full pl-9 pr-4 py-2 text-sm border border-gray-300 rounded-full focus:outline-none focus:border-brand-gold bg-gray-50 focus:bg-white transition-colors shadow-sm">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-gray-400 absolute left-3 top-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
+                </div>
+                <button onclick="window.logOutAdmin()" class="bg-red-50 hover:bg-red-100 text-red-600 px-4 py-2 rounded-full transition font-bold text-xs border border-red-200 shadow-sm whitespace-nowrap">Đăng Xuất</button>
+                <button onclick="window.toggleAdmin()" class="bg-gray-100 hover:bg-gray-200 text-gray-800 px-4 py-2 rounded-full transition font-medium text-sm border shadow-sm whitespace-nowrap">Trở về Web</button>
+            </div>
         </div>
 
-        <div class="flex mb-6 border-b border-gray-200 gap-2 overflow-x-auto">
-            <div id="tabProducts" onclick="window.switchTab('products')" class="admin-tab active">📦 Quản lý Sản Phẩm</div>
-            <div id="tabOrders" onclick="window.switchTab('orders')" class="admin-tab">📋 Đơn Hàng</div>
-        </div>
+        <div id="adminTabsContainer" class="flex mb-6 border-b border-gray-200 gap-2 overflow-x-auto custom-scrollbar pb-1"></div>
 
-        <div id="viewProducts" class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            <div class="lg:col-span-1 bg-brand-bg p-6 rounded border border-brand-border h-fit">
-                <h3 class="font-bold text-brand-dark mb-4 uppercase tracking-wider text-sm">Thêm Sản Phẩm Mới</h3>
-                <form id="adminAddForm" onsubmit="window.handleAddProduct(event)" class="space-y-4">
-                    <div>
-                        <label class="block text-xs font-bold text-gray-600 mb-1">Tên Xu *</label>
-                        <input type="text" id="addName" required placeholder="VD: Đồng Xu Cảnh Thịnh" class="w-full px-3 py-2 border border-brand-border focus:ring-1 focus:ring-brand-gold outline-none rounded-sm">
+        <div id="adminContentContainer" class="min-h-[400px]">
+            <div id="viewDashboard" class="admin-view hidden">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+                    <div class="bg-[#f8f5ee] border border-[#d8ccb8] p-5 rounded flex flex-col justify-center items-center shadow-sm">
+                        <span class="text-gray-500 text-xs font-bold uppercase tracking-wider mb-1">Tổng Doanh Thu</span>
+                        <span id="dashRevenue" class="text-3xl font-bold font-sans text-red-800">0đ</span>
                     </div>
-                    <div class="grid grid-cols-2 gap-4">
-                        <div>
-                            <label class="block text-xs font-bold text-gray-600 mb-1">Giá *</label>
-                            <input type="text" id="addPrice" required placeholder="VD: 500.000đ" class="w-full px-3 py-2 border border-brand-border focus:ring-1 focus:ring-brand-gold outline-none rounded-sm">
-                        </div>
-                        <div>
-                            <label class="block text-xs font-bold text-gray-600 mb-1">Năm đúc *</label>
-                            <input type="text" id="addYears" required placeholder="VD: 1792-1802" class="w-full px-3 py-2 border border-brand-border focus:ring-1 focus:ring-brand-gold outline-none rounded-sm">
-                        </div>
+                    <div class="bg-[#f8f5ee] border border-[#d8ccb8] p-5 rounded flex flex-col justify-center items-center shadow-sm">
+                        <span class="text-gray-500 text-xs font-bold uppercase tracking-wider mb-1">Tổng Đơn Hàng</span>
+                        <span id="dashTotalOrders" class="text-3xl font-bold font-sans text-brand-dark">0</span>
                     </div>
-                    <div class="grid grid-cols-2 gap-4">
-                        <div>
-                            <label class="block text-xs font-bold text-gray-600 mb-1">Triều đại *</label>
-                            <input type="text" id="addPeriod" required placeholder="VD: Triều Tây Sơn" class="w-full px-3 py-2 border border-brand-border focus:ring-1 focus:ring-brand-gold outline-none rounded-sm">
-                        </div>
-                        <div>
-                            <label class="block text-xs font-bold text-gray-600 mb-1">Ký tự ảo (Nếu ko có ảnh)</label>
-                            <input type="text" id="addSymbol" placeholder="VD: 寶" maxlength="1" class="w-full px-3 py-2 border border-brand-border focus:ring-1 focus:ring-brand-gold outline-none rounded-sm">
-                        </div>
+                    <div class="bg-[#f8f5ee] border border-[#d8ccb8] p-5 rounded flex flex-col justify-center items-center shadow-sm">
+                        <span class="text-gray-500 text-xs font-bold uppercase tracking-wider mb-1">Sản Phẩm Đang Bán</span>
+                        <span id="dashTotalProducts" class="text-3xl font-bold font-sans text-[#8c5a2b]">0</span>
                     </div>
-                    <div>
-                        <label class="block text-xs font-bold text-gray-600 mb-1">Hình ảnh thật (Có thể chọn nhiều ảnh)</label>
-                        <input type="file" id="addImages" accept="image/*" multiple class="w-full px-3 py-2 border border-brand-border bg-white focus:ring-1 focus:ring-brand-gold outline-none text-xs rounded-sm">
-                    </div>
-                    <div>
-                        <label class="block text-xs font-bold text-gray-600 mb-1">Mô tả chi tiết *</label>
-                        <textarea id="addDesc" required rows="3" class="w-full px-3 py-2 border border-brand-border focus:ring-1 focus:ring-brand-gold outline-none resize-none rounded-sm"></textarea>
-                    </div>
-                    <button type="submit" class="w-full bg-brand-btn text-brand-gold font-bold py-3 hover:bg-black transition-colors shadow mt-2 rounded-full uppercase text-xs tracking-wider">
-                        + LƯU SẢN PHẨM
-                    </button>
-                </form>
-            </div>
-
-            <div class="lg:col-span-2">
-                <h3 class="font-bold text-brand-dark mb-4 uppercase tracking-wider text-sm flex justify-between">
-                    <span>Kho Hàng Hiện Tại</span>
-                    <span id="productCountBadge" class="bg-brand-gold text-white px-2 py-0.5 rounded text-xs">0</span>
-                </h3>
-                <div class="overflow-x-auto border border-brand-border">
-                    <table class="w-full text-left text-sm">
-                        <thead class="bg-brand-card text-gray-700 border-b border-brand-border">
-                            <tr>
-                                <th class="px-4 py-3 font-semibold">Hình ảnh</th>
-                                <th class="px-4 py-3 font-semibold">Tên SP</th>
-                                <th class="px-4 py-3 font-semibold">Giá</th>
-                                <th class="px-4 py-3 font-semibold text-center">Hành động</th>
-                            </tr>
-                        </thead>
-                        <tbody id="adminTableBody" class="divide-y divide-gray-200"></tbody>
-                    </table>
+                </div>
+                <div class="bg-white border border-gray-200 rounded p-4 shadow-sm w-full h-[400px] flex items-center justify-center">
+                    <canvas id="revenueChart"></canvas>
                 </div>
             </div>
-        </div>
 
-        <div id="viewOrders" class="hidden">
-            <h3 class="font-bold text-brand-dark mb-4 uppercase tracking-wider text-sm flex justify-between">
-                <span>Danh Sách Người Mua / Đơn Hàng</span>
-                <span id="orderCountBadge" class="bg-red-800 text-white px-2 py-0.5 rounded text-xs">0</span>
-            </h3>
-            <div class="overflow-x-auto border border-brand-border">
-                <table class="w-full text-left text-sm">
-                    <thead class="bg-brand-card text-gray-700 border-b border-brand-border">
-                        <tr>
-                            <th class="px-4 py-3 font-semibold">Thời gian</th>
-                            <th class="px-4 py-3 font-semibold">Khách hàng</th>
-                            <th class="px-4 py-3 font-semibold">Sản phẩm</th>
-                            <th class="px-4 py-3 font-semibold">SĐT & Địa chỉ</th>
-                            <th class="px-4 py-3 font-semibold text-center">Trạng thái</th>
-                        </tr>
-                    </thead>
-                    <tbody id="ordersTableBody" class="divide-y divide-gray-200"></tbody>
-                </table>
+            <div id="viewProducts" class="admin-view hidden">
+                <div class="grid grid-cols-1 lg:grid-cols-4 gap-8">
+                    <div class="lg:col-span-1 bg-brand-bg p-6 rounded border border-brand-border h-fit">
+                        <h3 class="font-bold text-brand-dark mb-4 uppercase tracking-wider text-sm">Thêm Sản Phẩm Mới</h3>
+                        <form id="adminAddForm" onsubmit="window.handleAddProduct(event)" class="space-y-4">
+                            <div><label class="block text-xs font-bold text-gray-600 mb-1">Tên Xu *</label><input type="text" id="addName" required placeholder="VD: Đồng Xu Cảnh Thịnh" class="w-full px-3 py-2 border border-brand-border focus:ring-1 focus:ring-brand-gold outline-none rounded-sm"></div>
+                            <div class="grid grid-cols-2 gap-4">
+                                <div><label class="block text-xs font-bold text-gray-600 mb-1">Giá *</label><input type="text" id="addPrice" required placeholder="VD: 500.000đ" class="w-full px-3 py-2 border border-brand-border focus:ring-1 focus:ring-brand-gold outline-none rounded-sm"></div>
+                                <div><label class="block text-xs font-bold text-gray-600 mb-1">Số Lượng *</label><input type="number" id="addQty" required placeholder="VD: 100" class="w-full px-3 py-2 border border-brand-border focus:ring-1 focus:ring-brand-gold outline-none rounded-sm"></div>
+                            </div>
+                            <div class="grid grid-cols-3 gap-4">
+                                <div class="col-span-1"><label class="block text-xs font-bold text-gray-600 mb-1">Năm đúc *</label><input type="text" id="addYears" required placeholder="1792" class="w-full px-3 py-2 border border-brand-border focus:ring-1 focus:ring-brand-gold outline-none rounded-sm"></div>
+                                <div class="col-span-2"><label class="block text-xs font-bold text-gray-600 mb-1">Triều đại *</label><input type="text" id="addPeriod" required placeholder="Triều Tây Sơn" class="w-full px-3 py-2 border border-brand-border focus:ring-1 focus:ring-brand-gold outline-none rounded-sm"></div>
+                            </div>
+                            <div><label class="block text-xs font-bold text-gray-600 mb-1">Hình ảnh (Có thể chọn nhiều)</label><input type="file" id="addImages" accept="image/*" multiple class="w-full px-3 py-2 border border-brand-border bg-white focus:ring-1 focus:ring-brand-gold outline-none text-xs rounded-sm"></div>
+                            <div class="grid grid-cols-4 gap-4">
+                                <div class="col-span-1"><label class="block text-xs font-bold text-gray-600 mb-1">Ký tự</label><input type="text" id="addSymbol" placeholder="寶" maxlength="1" class="w-full px-3 py-2 border border-brand-border focus:ring-1 focus:ring-brand-gold outline-none rounded-sm text-center"></div>
+                                <div class="col-span-3"><label class="block text-xs font-bold text-gray-600 mb-1">Chiết khấu (%)</label><input type="number" id="addDiscount" placeholder="VD: 15" class="w-full px-3 py-2 border border-brand-border focus:ring-1 focus:ring-brand-gold outline-none rounded-sm"></div>
+                            </div>
+                            <div><label class="block text-xs font-bold text-gray-600 mb-1">Mô tả chi tiết *</label><textarea id="addDesc" required rows="3" class="w-full px-3 py-2 border border-brand-border focus:ring-1 focus:ring-brand-gold outline-none resize-none rounded-sm"></textarea></div>
+                            <button type="submit" class="w-full bg-brand-btn text-brand-gold font-bold py-3 hover:bg-black transition-colors shadow mt-2 rounded-full uppercase text-xs tracking-wider flex items-center justify-center gap-2">
+                                <span class="spinner-icon hidden"><svg class="animate-spin h-4 w-4 text-brand-gold" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg></span>
+                                <span>+ LƯU SẢN PHẨM</span>
+                            </button>
+                        </form>
+                    </div>
+                    <div class="lg:col-span-3">
+                        <h3 class="font-bold text-brand-dark mb-4 uppercase tracking-wider text-sm flex justify-between"><span>Kho Hàng Hiện Tại</span><span id="productCountBadge" class="bg-brand-gold text-white px-2 py-0.5 rounded text-xs">0</span></h3>
+                        <div class="overflow-x-auto border border-brand-border custom-scrollbar">
+                            <table class="w-full text-left text-sm min-w-[600px]">
+                                <thead class="bg-brand-card text-gray-700 border-b border-brand-border">
+                                    <tr><th class="px-4 py-3 font-semibold">Hình ảnh</th><th class="px-4 py-3 font-semibold">Tên SP</th><th class="px-4 py-3 font-semibold">Giá</th><th class="px-4 py-3 font-semibold text-center text-blue-800">Tồn Kho</th><th class="px-4 py-3 font-semibold text-center w-32">Hành động</th></tr>
+                                </thead>
+                                <tbody id="adminTableBody" class="divide-y divide-gray-200"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
             </div>
+
+            <!-- Các view Admin khác tự động render qua JS -->
+            <div id="viewOrders" class="admin-view hidden"></div>
+            <div id="viewUsers" class="admin-view hidden"></div>
+            <div id="viewInfo" class="admin-view hidden"></div>
+            <div id="viewNews" class="admin-view hidden"></div>
+            <div id="viewContact" class="admin-view hidden"></div>
+            <div id="viewAdmin" class="admin-view hidden"></div>
         </div>
     </main>
 
-    <!-- FOOTER -->
-    <footer class="bg-[#2d2d2d] text-gray-300 pt-10 mt-auto border-t-4 border-brand-gold text-sm relative z-10">
-        <div class="container mx-auto px-4 max-w-7xl">
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+    <footer class="w-full bg-[#2d2d2d] text-gray-300 pt-10 mt-auto border-t-4 border-brand-gold text-sm relative z-10">
+        <div class="w-full mx-auto px-4 md:px-8 xl:px-12 2xl:px-16">
+            <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-8">
                 <div>
                     <h4 class="text-white font-bold text-base mb-4 uppercase border-b border-gray-500 pb-2 inline-block w-full">Thông tin liên hệ</h4>
                     <ul class="space-y-3 mt-4 text-[13px] leading-relaxed">
@@ -333,7 +306,7 @@
                         <li><strong>Facebook:</strong> <a href="https://facebook.com/thanhle123" target="_blank" class="hover:text-brand-gold transition-colors">facebook.com/thanhle123</a></li>
                     </ul>
                 </div>
-                
+
                 <div>
                     <h4 class="text-white font-bold text-base mb-4 uppercase border-b border-gray-500 pb-2 inline-block w-full">Tin tức</h4>
                     <ul class="space-y-3 mt-4 text-[13px] pr-4">
@@ -342,7 +315,7 @@
                         <li><a href="#" onclick="window.switchPage('news'); return false;" class="hover:text-brand-gold transition-colors block line-clamp-2" title="Lịch sử hệ thống tiền tệ phong kiến Triều Nguyễn">› Lịch sử hệ thống tiền tệ phong kiến Triều Nguyễn</a></li>
                     </ul>
                 </div>
-                
+
                 <div>
                     <h4 class="text-white font-bold text-base mb-4 uppercase border-b border-gray-500 pb-2 inline-block w-full">Thống kê truy cập</h4>
                     <ul class="space-y-2 mt-4 text-[13px]">
@@ -352,7 +325,7 @@
                         <li class="flex items-center gap-2"><span class="text-gray-400 w-4 text-center">👥</span> Tổng số: 1176394</li>
                     </ul>
                 </div>
-                
+
                 <div>
                     <div class="bg-white p-3 rounded shadow-sm text-gray-800">
                         <div class="flex items-start gap-3 mb-3 border-b border-gray-200 pb-3">
@@ -366,31 +339,138 @@
                         </div>
                         <div class="flex gap-2">
                             <button class="bg-[#f5f6f7] border border-[#ccd0d5] text-[#4b4f56] px-2 py-1.5 text-[11px] font-bold flex items-center justify-center flex-1 hover:bg-[#ebedf0] transition-colors rounded-sm">
-                                <span class="text-[#385898] font-serif font-bold text-sm mr-1.5">f</span> Theo dõi Trang
+                                <span class="text-[#385898] font-serif font-bold text-sm mr-1.5">f</span> Theo dõi
                             </button>
                             <button class="bg-[#f5f6f7] border border-[#ccd0d5] text-[#4b4f56] px-2 py-1.5 text-[11px] font-bold flex items-center justify-center flex-1 hover:bg-[#ebedf0] transition-colors rounded-sm">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 mr-1" viewBox="0 0 20 20" fill="currentColor"><path d="M15 8a3 3 0 10-2.977-2.63l-4.94 2.47a3 3 0 100 4.319l4.94 2.47a3 3 0 10.895-1.789l-4.94-2.47a3.027 3.027 0 000-.74l4.94-2.47C13.456 7.68 14.19 8 15 8z" /></svg>
-                                Chia sẻ
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 mr-1" viewBox="0 0 20 20" fill="currentColor">
+                                    <path d="M15 8a3 3 0 10-2.977-2.63l-4.94 2.47a3 3 0 100 4.319l4.94 2.47a3 3 0 10.895-1.789l-4.94-2.47a3.027 3.027 0 000-.74l4.94-2.47C13.456 7.68 14.19 8 15 8z" />
+                                </svg> Chia sẻ
                             </button>
                         </div>
+                    </div>
+                    
+                    <div class="mt-4 grid grid-cols-3 gap-2">
+                        <a href="tel:0916694438" class="flex flex-col items-center justify-center gap-1 bg-[#28a745] hover:bg-[#218838] text-white py-2 rounded transition-colors text-[11px] font-bold shadow-sm" title="Gọi điện thoại">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor"><path d="M2 3a1 1 0 011-1h2.153a1 1 0 01.986.836l.74 4.435a1 1 0 01-.54 1.06l-1.548.773a11.037 11.037 0 006.105 6.105l.774-1.548a1 1 0 011.059-.54l4.435.74a1 1 0 01.836.986V17a1 1 0 01-1 1h-2C7.82 18 2 12.18 2 5V3z" /></svg>
+                            Gọi ngay
+                        </a>
+                        <a href="https://zalo.me/0916694438" target="_blank" class="flex flex-col items-center justify-center gap-1 bg-[#0068ff] hover:bg-[#0051c7] text-white py-2 rounded transition-colors text-[11px] font-bold shadow-sm" title="Chat Zalo">
+                            <span class="text-base leading-none font-black tracking-tighter">Zalo</span>
+                            Chat Zalo
+                        </a>
+                        <a href="https://m.me/thanhle123" target="_blank" class="flex flex-col items-center justify-center gap-1 bg-[#0084ff] hover:bg-[#006bd1] text-white py-2 rounded transition-colors text-[11px] font-bold shadow-sm" title="Chat Messenger">
+                            <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C6.477 2 2 6.145 2 11.258c0 2.902 1.446 5.44 3.665 7.123v3.313l3.35-1.841c.95.27 1.954.417 2.985.417 5.523 0 10-4.145 10-9.258S17.523 2 12 2zm1.09 12.392l-2.82-3.003-5.503 3.003 6.046-6.425 2.88 3.004 5.443-3.004-6.046 6.425z"/></svg>
+                            Messenger
+                        </a>
                     </div>
                 </div>
             </div>
         </div>
-        
-        <div class="bg-[#1a1a1a] py-4 mt-10">
-            <div class="container mx-auto px-4 flex flex-col md:flex-row justify-between items-center gap-4">
+
+        <div class="bg-[#1a1a1a] py-4 mt-10 w-full">
+            <div class="w-full mx-auto px-4 md:px-8 xl:px-12 flex flex-col md:flex-row justify-between items-center gap-4">
                 <p class="text-[13px] text-gray-400">Copyright © 2026. Allright reserved</p>
                 <div class="flex items-center gap-4" id="adminControlBox">
-                    <button onclick="window.handleAuth()" class="text-xs text-brand-gold border border-brand-gold px-4 py-1.5 hover:bg-brand-gold hover:text-[#1a1a1a] transition-colors rounded-full shadow-sm">
-                        🔑 Đăng nhập Admin
+                    <button onclick="window.openLoginModal()" class="text-xs text-brand-gold border border-brand-gold px-4 py-1.5 hover:bg-brand-gold hover:text-[#1a1a1a] transition-colors rounded-full shadow-sm whitespace-nowrap">
+                        🔑 Cổng Quản Trị
                     </button>
                 </div>
             </div>
         </div>
     </footer>
 
-    <!-- MODAL GIỎ HÀNG -->
+    <!-- Các Modals Chức Năng -->
+    <div id="loginModal" class="fixed inset-0 bg-black bg-opacity-70 z-[80] flex items-center justify-center p-4 opacity-0 pointer-events-none transition-opacity duration-300">
+        <div class="bg-white w-full max-w-sm rounded-md shadow-2xl relative transform scale-95 transition-transform duration-300 overflow-hidden" id="loginContent">
+            <div class="bg-brand-dark p-6 text-center border-b-4 border-brand-gold">
+                <div class="w-16 h-16 rounded-full border-2 border-brand-gold mx-auto mb-3 flex items-center justify-center bg-[#2a221b]">
+                    <span class="font-serif text-3xl font-bold text-brand-gold">古</span>
+                </div>
+                <h3 class="text-white font-serif font-bold text-xl tracking-wide uppercase">Cổng Quản Trị</h3>
+            </div>
+            <div class="p-6">
+                <form id="loginForm" onsubmit="window.submitLogin(event)" class="space-y-4">
+                    <div>
+                        <label class="block text-xs font-bold text-gray-600 mb-1">Tên Đăng Nhập</label>
+                        <input type="text" id="loginUsername" required class="w-full px-4 py-2 text-sm border border-gray-300 focus:border-brand-gold outline-none rounded bg-gray-50 focus:bg-white transition-colors">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-gray-600 mb-1">Mật Khẩu</label>
+                        <input type="password" id="loginPassword" required class="w-full px-4 py-2 text-sm border border-gray-300 focus:border-brand-gold outline-none rounded bg-gray-50 focus:bg-white transition-colors">
+                    </div>
+                    <button type="submit" class="w-full bg-brand-gold text-white font-bold py-2.5 mt-2 hover:bg-[#b89052] transition-colors uppercase text-sm rounded shadow flex items-center justify-center gap-2">
+                        <span class="spinner-icon hidden"><svg class="animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg></span>
+                        <span>ĐĂNG NHẬP</span>
+                    </button>
+                </form>
+                <div class="text-center mt-4">
+                    <button onclick="window.closeLoginModal()" class="text-xs text-gray-400 hover:text-gray-600 underline">Quay lại trang chủ</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Product Modal -->
+    <div id="editProductModal" class="fixed inset-0 bg-black bg-opacity-70 z-[80] flex items-center justify-center p-4 opacity-0 pointer-events-none transition-opacity duration-300">
+        <div class="bg-white w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-md shadow-2xl relative transform scale-95 transition-transform duration-300 custom-scrollbar" id="editProductContent">
+            <div class="bg-brand-dark p-4 flex justify-between items-center border-b-4 border-brand-gold sticky top-0 z-10">
+                <h3 class="text-white font-serif font-bold text-lg tracking-wide uppercase">Sửa Sản Phẩm</h3>
+                <button onclick="window.closeEditModal()" class="text-gray-400 hover:text-white transition">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+                </button>
+            </div>
+            <div class="p-6">
+                <form id="adminEditForm" onsubmit="window.submitEditProduct(event)" class="space-y-4">
+                    <input type="hidden" id="editProductId">
+                    <div><label class="block text-xs font-bold text-gray-600 mb-1">Tên Xu *</label><input type="text" id="editName" required class="w-full px-3 py-2 border border-brand-border focus:ring-1 focus:ring-brand-gold outline-none rounded-sm"></div>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div><label class="block text-xs font-bold text-gray-600 mb-1">Giá *</label><input type="text" id="editPrice" required class="w-full px-3 py-2 border border-brand-border focus:ring-1 focus:ring-brand-gold outline-none rounded-sm"></div>
+                        <div><label class="block text-xs font-bold text-gray-600 mb-1">Số Lượng *</label><input type="number" id="editQty" required class="w-full px-3 py-2 border border-brand-border focus:ring-1 focus:ring-brand-gold outline-none rounded-sm"></div>
+                    </div>
+                    <div class="grid grid-cols-3 gap-4">
+                        <div class="col-span-1"><label class="block text-xs font-bold text-gray-600 mb-1">Năm đúc *</label><input type="text" id="editYears" required class="w-full px-3 py-2 border border-brand-border focus:ring-1 focus:ring-brand-gold outline-none rounded-sm"></div>
+                        <div class="col-span-2"><label class="block text-xs font-bold text-gray-600 mb-1">Triều đại *</label><input type="text" id="editPeriod" required class="w-full px-3 py-2 border border-brand-border focus:ring-1 focus:ring-brand-gold outline-none rounded-sm"></div>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-gray-600 mb-1">Hình ảnh (Để trống nếu giữ nguyên ảnh cũ)</label>
+                        <input type="file" id="editImages" accept="image/*" multiple class="w-full px-3 py-2 border border-brand-border bg-white focus:ring-1 focus:ring-brand-gold outline-none text-xs rounded-sm">
+                    </div>
+                    <div class="grid grid-cols-4 gap-4">
+                        <div class="col-span-1"><label class="block text-xs font-bold text-gray-600 mb-1">Ký tự ảo</label><input type="text" id="editSymbol" maxlength="1" class="w-full px-3 py-2 border border-brand-border focus:ring-1 focus:ring-brand-gold outline-none rounded-sm text-center"></div>
+                        <div class="col-span-3"><label class="block text-xs font-bold text-gray-600 mb-1">Chiết khấu (%)</label><input type="number" id="editDiscount" class="w-full px-3 py-2 border border-brand-border focus:ring-1 focus:ring-brand-gold outline-none rounded-sm"></div>
+                    </div>
+                    <div><label class="block text-xs font-bold text-gray-600 mb-1">Mô tả chi tiết *</label><textarea id="editDesc" required rows="4" class="w-full px-3 py-2 border border-brand-border focus:ring-1 focus:ring-brand-gold outline-none resize-none rounded-sm"></textarea></div>
+                    <button type="submit" class="w-full bg-brand-gold text-white font-bold py-3 hover:bg-[#b89052] transition-colors shadow mt-4 rounded-full uppercase text-xs tracking-wider flex items-center justify-center gap-2">
+                        <span class="spinner-icon hidden"><svg class="animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg></span>
+                        <span>CẬP NHẬT SẢN PHẨM</span>
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- UNIVERSAL EDIT MODAL -->
+    <div id="adminUniversalEditModal" class="fixed inset-0 bg-black bg-opacity-70 z-[90] flex items-center justify-center p-4 opacity-0 pointer-events-none transition-opacity duration-300">
+        <div class="bg-white w-full max-w-xl max-h-[90vh] overflow-y-auto rounded-md shadow-2xl relative transform scale-95 transition-transform duration-300 custom-scrollbar" id="adminUniversalEditContent">
+            <div class="bg-brand-dark p-4 flex justify-between items-center border-b-4 border-brand-gold sticky top-0 z-10">
+                <h3 id="adminUniversalEditTitle" class="text-white font-serif font-bold text-lg tracking-wide uppercase">Cập Nhật</h3>
+                <button onclick="window.closeUniversalEdit()" class="text-gray-400 hover:text-white transition">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+                </button>
+            </div>
+            <div class="p-6">
+                <form id="adminUniversalEditForm" onsubmit="window.submitUniversalEdit(event)">
+                    <div id="adminUniversalEditFields" class="space-y-4"></div>
+                    <button type="submit" class="w-full bg-brand-gold text-white font-bold py-3 hover:bg-[#b89052] transition-colors shadow mt-6 rounded-full uppercase text-xs tracking-wider flex items-center justify-center gap-2">
+                        <span class="spinner-icon hidden"><svg class="animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg></span>
+                        <span>CẬP NHẬT DỮ LIỆU</span>
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modals cho Cart, Order, Detail (Giữ Nguyên) -->
     <div id="cartModal" class="fixed inset-0 bg-black bg-opacity-60 z-[60] opacity-0 pointer-events-none transition-opacity duration-300">
         <div class="absolute inset-y-0 right-0 w-full max-w-md bg-brand-bg shadow-2xl transform translate-x-full transition-transform duration-300 flex flex-col" id="cartContent">
             <div class="px-6 py-4 border-b border-brand-border flex justify-between items-center bg-white">
@@ -402,173 +482,96 @@
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
                 </button>
             </div>
-
-            <div id="cartItemsContainer" class="flex-grow overflow-y-auto p-4 space-y-4">
-                <!-- Items here -->
-            </div>
-
+            <div id="cartItemsContainer" class="flex-grow overflow-y-auto p-4 space-y-4"></div>
             <div class="p-6 bg-white border-t border-brand-border">
                 <div class="flex justify-between items-center mb-4">
                     <span class="text-sm font-bold text-gray-600 uppercase tracking-wider">Tổng cộng:</span>
-                    <span id="cartTotalPrice" class="text-2xl font-serif font-bold text-red-800">0đ</span>
+                    <span id="cartTotalPrice" class="text-2xl font-sans font-bold text-red-800">0đ</span>
                 </div>
                 <button onclick="window.checkoutCart()" class="w-full bg-brand-btn text-brand-gold font-bold py-3 hover:bg-black transition-colors uppercase tracking-wider text-sm rounded-full shadow-lg flex justify-center items-center gap-2">
-                    Tiến hành Thanh Toán
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" /></svg>
+                    Tiến hành Thanh Toán <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" /></svg>
                 </button>
             </div>
         </div>
     </div>
 
-    <!-- MODAL ĐẶT HÀNG (CẬP NHẬT GIAO DIỆN 75%) -->
-    <div id="orderModal"
-        class="fixed inset-0 bg-black bg-opacity-70 z-[70] flex items-center justify-center p-4 opacity-0 pointer-events-none transition-opacity duration-300">
-        <div class="bg-brand-bg w-[95vw] lg:w-[75vw] max-w-6xl border border-brand-gold shadow-2xl relative transform scale-95 transition-transform duration-300 rounded-md flex flex-col overflow-hidden max-h-[90vh]"
-            id="modalContent">
-
-            <!-- Header Modal (Cố định trên cùng) -->
-            <div
-                class="p-4 md:p-5 border-b border-brand-border bg-white flex justify-between items-center relative z-20 shadow-sm flex-shrink-0">
-                <h3 class="text-xl md:text-2xl font-serif font-bold text-brand-dark leading-tight">Thanh Toán Đơn Hàng
-                </h3>
-                <button onclick="window.closeModal()"
-                    class="text-gray-500 hover:text-red-600 transition-colors bg-gray-100 hover:bg-gray-200 rounded-full p-1.5 shadow-sm">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
-                        stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M6 18L18 6M6 6l12 12" />
-                    </svg>
+    <div id="orderModal" class="fixed inset-0 bg-black bg-opacity-70 z-[70] flex items-center justify-center p-4 opacity-0 pointer-events-none transition-opacity duration-300">
+        <div class="bg-brand-bg w-[95vw] lg:w-[75vw] max-w-6xl border border-brand-gold shadow-2xl relative transform scale-95 transition-transform duration-300 rounded-md flex flex-col overflow-hidden max-h-[90vh]" id="modalContent">
+            <div class="p-4 md:p-5 border-b border-brand-border bg-white flex justify-between items-center relative z-20 shadow-sm flex-shrink-0">
+                <h3 class="text-xl md:text-2xl font-serif font-bold text-brand-dark leading-tight">Thanh Toán Đơn Hàng</h3>
+                <button onclick="window.closeModal()" class="text-gray-500 hover:text-red-600 transition-colors bg-gray-100 hover:bg-gray-200 rounded-full p-1.5 shadow-sm">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
                 </button>
             </div>
-
-            <!-- Phần thân Modal (Chứa 2 cột, cho phép cuộn độc lập) -->
             <div class="flex flex-col lg:flex-row flex-grow overflow-hidden relative w-full bg-brand-bg">
-
-                <!-- Cột Trái: Tóm tắt đơn hàng (Có thể cuộn) -->
-                <!-- ĐÃ SỬA: Thêm flex-shrink-0, min-h-[35vh] và max-h-[45vh] để tối ưu hiển thị trên điện thoại -->
-                <div
-                    class="lg:w-5/12 p-6 md:p-8 bg-brand-card border-b lg:border-b-0 lg:border-r border-brand-border flex flex-col overflow-hidden flex-shrink-0 min-h-[35vh] max-h-[45vh] lg:min-h-0 lg:max-h-none lg:overflow-y-auto">
-                    <h4
-                        class="font-bold text-brand-dark mb-4 uppercase tracking-wider text-sm flex items-center gap-2 flex-shrink-0">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-[#8c5a2b]" fill="none"
-                            viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
-                        </svg>
-                        Sản phẩm đã chọn
+                <div class="lg:w-5/12 p-6 md:p-8 bg-brand-card border-b lg:border-b-0 lg:border-r border-brand-border flex flex-col overflow-hidden flex-shrink-0 min-h-[35vh] max-h-[45vh] lg:min-h-0 lg:max-h-none lg:overflow-y-auto">
+                    <h4 class="font-bold text-brand-dark mb-4 uppercase tracking-wider text-sm flex items-center gap-2 flex-shrink-0">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-[#8c5a2b]" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" /></svg> Sản phẩm đã chọn
                     </h4>
-                    <div id="orderSummaryItems" class="space-y-3 mb-6 flex-grow overflow-y-auto pr-2 custom-scrollbar">
-                        <!-- JS renders items here -->
-                    </div>
+                    <div id="orderSummaryItems" class="space-y-3 mb-6 flex-grow overflow-y-auto pr-2 custom-scrollbar"></div>
                     <div class="border-t border-brand-border pt-4 flex justify-between items-end mt-auto flex-shrink-0">
                         <span class="text-sm font-bold text-gray-600 uppercase tracking-wider">Tổng cộng:</span>
                         <span id="modalProductPrice" class="text-2xl font-sans font-bold text-red-800">0đ</span>
                     </div>
                 </div>
 
-                <!-- Cột Phải: Form nhập liệu & QR (Có thể cuộn) -->
-                <div class="lg:w-7/12 p-6 md:p-8 bg-brand-bg overflow-y-auto">
+                <div class="lg:w-7/12 p-6 md:p-8 bg-brand-bg overflow-y-auto custom-scrollbar">
                     <form id="orderForm" onsubmit="window.submitOrder(event)" class="space-y-4">
                         <input type="hidden" id="hiddenProductName" name="product_name">
-
-                        <div><input type="text" name="customer_name" required placeholder="Họ và Tên *"
-                                class="w-full px-4 py-2 text-sm border border-brand-border focus:ring-1 focus:ring-brand-gold outline-none rounded-sm">
-                        </div>
+                        <div><input type="text" name="customer_name" required placeholder="Họ và Tên *" class="w-full px-4 py-2 text-sm border border-brand-border focus:ring-1 focus:ring-brand-gold outline-none rounded-sm"></div>
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div><input type="tel" name="phone" required placeholder="Số điện thoại *"
-                                    class="w-full px-4 py-2 text-sm border border-brand-border focus:ring-1 focus:ring-brand-gold outline-none rounded-sm">
-                            </div>
-                            <div><input type="email" name="email" placeholder="Email (Tuỳ chọn)"
-                                    class="w-full px-4 py-2 text-sm border border-brand-border focus:ring-1 focus:ring-brand-gold outline-none rounded-sm">
-                            </div>
+                            <div><input type="tel" name="phone" required placeholder="Số điện thoại *" class="w-full px-4 py-2 text-sm border border-brand-border focus:ring-1 focus:ring-brand-gold outline-none rounded-sm"></div>
+                            <div><input type="email" name="email" placeholder="Email (Tuỳ chọn)" class="w-full px-4 py-2 text-sm border border-brand-border focus:ring-1 focus:ring-brand-gold outline-none rounded-sm"></div>
                         </div>
-                        <div><textarea name="address" required rows="2" placeholder="Địa chỉ giao hàng chi tiết *"
-                                class="w-full px-4 py-2 text-sm border border-brand-border focus:ring-1 focus:ring-brand-gold resize-none outline-none rounded-sm"></textarea>
-                        </div>
-                        <div><textarea name="notes" rows="2" placeholder="Ghi chú đơn hàng (Tuỳ chọn)"
-                                class="w-full px-4 py-2 text-sm border border-brand-border focus:ring-1 focus:ring-brand-gold resize-none outline-none rounded-sm"></textarea>
-                        </div>
+                        <div><textarea name="address" required rows="2" placeholder="Địa chỉ giao hàng chi tiết *" class="w-full px-4 py-2 text-sm border border-brand-border focus:ring-1 focus:ring-brand-gold resize-none outline-none rounded-sm"></textarea></div>
+                        <div><textarea name="notes" rows="2" placeholder="Ghi chú đơn hàng (Tuỳ chọn)" class="w-full px-4 py-2 text-sm border border-brand-border focus:ring-1 focus:ring-brand-gold resize-none outline-none rounded-sm"></textarea></div>
 
-                        <!-- Lựa chọn Thanh toán -->
                         <div class="mt-4 border-t border-brand-border pt-5">
                             <p class="text-sm font-bold text-brand-dark mb-3">Phương thức thanh toán:</p>
                             <div class="space-y-3">
-                                <label
-                                    class="flex items-start gap-3 cursor-pointer group p-3 border border-gray-200 rounded-sm hover:border-brand-gold transition-colors bg-white">
-                                    <input type="radio" name="payment_method" value="COD" checked
-                                        onchange="window.togglePaymentInfo()" class="mt-1 accent-[#8c5a2b] w-4 h-4">
-                                    <span class="text-sm">
-                                        <strong
-                                            class="block text-gray-800 group-hover:text-[#8c5a2b] transition-colors">Thanh
-                                            toán khi nhận hàng (COD)</strong>
-                                        <span class="text-[11px] text-gray-500 block mt-1 leading-relaxed">Kiểm tra sản
-                                            phẩm và thanh toán tiền mặt cho shipper khi nhận được hàng.</span>
-                                    </span>
+                                <label class="flex items-start gap-3 cursor-pointer group p-3 border border-gray-200 rounded-sm hover:border-brand-gold transition-colors bg-white">
+                                    <input type="radio" name="payment_method" value="COD" checked onchange="window.togglePaymentInfo()" class="mt-1 accent-[#8c5a2b] w-4 h-4">
+                                    <span class="text-sm"><strong class="block text-gray-800 group-hover:text-[#8c5a2b] transition-colors">Thanh toán khi nhận hàng (COD)</strong><span class="text-[11px] text-gray-500 block mt-1 leading-relaxed">Kiểm tra sản phẩm và thanh toán tiền mặt cho shipper khi nhận được hàng.</span></span>
                                 </label>
-                                <label
-                                    class="flex items-start gap-3 cursor-pointer group p-3 border border-gray-200 rounded-sm hover:border-brand-gold transition-colors bg-white">
-                                    <input type="radio" name="payment_method" value="BANK"
-                                        onchange="window.togglePaymentInfo()" class="mt-1 accent-[#8c5a2b] w-4 h-4">
-                                    <span class="text-sm">
-                                        <strong
-                                            class="block text-gray-800 group-hover:text-[#8c5a2b] transition-colors">Chuyển
-                                            khoản / Quét mã QR</strong>
-                                        <span class="text-[11px] text-gray-500 block mt-1 leading-relaxed">Thanh toán an
-                                            toàn, quét mã QR qua App Ngân hàng nhanh chóng.</span>
-                                    </span>
+                                <label class="flex items-start gap-3 cursor-pointer group p-3 border border-gray-200 rounded-sm hover:border-brand-gold transition-colors bg-white">
+                                    <input type="radio" name="payment_method" value="BANK" onchange="window.togglePaymentInfo()" class="mt-1 accent-[#8c5a2b] w-4 h-4">
+                                    <span class="text-sm"><strong class="block text-gray-800 group-hover:text-[#8c5a2b] transition-colors">Chuyển khoản / Quét mã QR</strong><span class="text-[11px] text-gray-500 block mt-1 leading-relaxed">Thanh toán an toàn, quét mã QR qua App Ngân hàng nhanh chóng.</span></span>
                                 </label>
                             </div>
                         </div>
 
-                        <!-- Khung quét mã QR -->
-                        <div id="bankInfoArea"
-                            class="hidden mt-4 p-5 bg-[#f8f5ee] border border-[#d8ccb8] rounded-sm text-center shadow-inner relative overflow-hidden">
-                            <div
-                                class="absolute inset-0 opacity-10 bg-[linear-gradient(#cda568_1px,transparent_1px),linear-gradient(90deg,#cda568_1px,transparent_1px)] bg-[size:15px_15px]">
-                            </div>
+                        <div id="bankInfoArea" class="hidden mt-4 p-5 bg-[#f8f5ee] border border-[#d8ccb8] rounded-sm text-center shadow-inner relative overflow-hidden">
+                            <div class="absolute inset-0 opacity-10 bg-[linear-gradient(#cda568_1px,transparent_1px),linear-gradient(90deg,#cda568_1px,transparent_1px)] bg-[size:15px_15px]"></div>
                             <div class="relative z-10">
-                                <p class="text-xs text-[#8c5a2b] font-bold mb-3 uppercase tracking-wider"><span
-                                        class="animate-pulse inline-block w-2 h-2 rounded-full bg-red-600 mr-1"></span>Quét
-                                    mã để thanh toán ngay</p>
-                                <!-- Mã QR tự tạo API VietQR -->
-                                <img id="qrCodeImg" src="https://img.vietqr.io/image/tcb-0916694438-compact2.jpg"
-                                    class="mx-auto w-40 h-40 border-4 border-white shadow-lg mb-4" alt="QR Code">
-                                <div
-                                    class="text-xs text-gray-700 space-y-1.5 bg-white py-3 px-4 border border-gray-200 inline-block text-left rounded shadow-sm w-full">
-                                    <p class="flex justify-between border-b border-gray-100 pb-1"><span>Ngân
-                                            hàng:</span> <strong class="text-[#8c5a2b]">Techcombank</strong></p>
-                                    <p class="flex justify-between border-b border-gray-100 pb-1 pt-1"><span>Số tài
-                                            khoản:</span> <strong class="text-brand-dark">0916 694 438</strong></p>
-                                    <p class="flex justify-between pt-1"><span>Chủ TK:</span> <strong>LE NGOC
-                                            THANH</strong></p>
+                                <p class="text-xs text-[#8c5a2b] font-bold mb-3 uppercase tracking-wider"><span class="animate-pulse inline-block w-2 h-2 rounded-full bg-red-600 mr-1"></span>Quét mã để thanh toán ngay</p>
+                                <img id="qrCodeImg" src="https://img.vietqr.io/image/tcb-0916694438-compact2.jpg" class="mx-auto w-40 h-40 border-4 border-white shadow-lg mb-4" alt="QR Code">
+                                <div class="text-xs text-gray-700 space-y-1.5 bg-white py-3 px-4 border border-gray-200 inline-block text-left rounded shadow-sm w-full">
+                                    <p class="flex justify-between border-b border-gray-100 pb-1"><span>Ngân hàng:</span> <strong class="text-[#8c5a2b]">Techcombank</strong></p>
+                                    <p class="flex justify-between border-b border-gray-100 pb-1 pt-1"><span>Số tài khoản:</span> <strong class="text-brand-dark">0916 694 438</strong></p>
+                                    <p class="flex justify-between pt-1"><span>Chủ TK:</span> <strong>LE NGOC THANH</strong></p>
                                 </div>
-                                <p class="text-[11px] text-gray-500 mt-3 italic leading-relaxed">* Vui lòng kiểm tra
-                                    đúng Tên trước khi chuyển khoản. Ghi chú chuyển tiền: SĐT của bạn.</p>
+                                <p class="text-[11px] text-gray-500 mt-3 italic leading-relaxed">* Vui lòng kiểm tra đúng Tên trước khi chuyển khoản. Ghi chú chuyển tiền: SĐT của bạn.</p>
                             </div>
                         </div>
                     </form>
                 </div>
             </div>
-
-            <!-- Footer Modal (Cố định dưới cùng chứa nút Submit) -->
-            <div
-                class="p-4 md:p-5 border-t border-brand-border bg-white relative z-20 shadow-[0_-4px_10px_rgba(0,0,0,0.05)] flex-shrink-0 flex justify-center">
-                <button form="orderForm" id="submitOrderBtn" type="submit"
-                    class="w-full md:w-2/3 lg:w-1/2 bg-brand-btn text-brand-gold font-bold py-3 hover:bg-black transition-colors shadow-lg uppercase tracking-wider text-sm rounded-full">
-                    ĐẶT HÀNG NGAY
+            
+            <div class="p-4 md:p-5 border-t border-brand-border bg-white relative z-20 shadow-[0_-4px_10px_rgba(0,0,0,0.05)] flex-shrink-0 flex justify-center">
+                <button form="orderForm" id="submitOrderBtn" type="submit" class="w-full md:w-2/3 lg:w-1/2 bg-brand-btn text-brand-gold font-bold py-3 hover:bg-black transition-colors shadow-lg uppercase tracking-wider text-sm rounded-full flex items-center justify-center gap-2">
+                    <span class="spinner-icon hidden"><svg class="animate-spin h-5 w-5 text-brand-gold" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg></span>
+                    <span class="btn-text">ĐẶT HÀNG NGAY</span>
                 </button>
             </div>
         </div>
     </div>
 
-    <!-- MODAL CHI TIẾT SẢN PHẨM -->
     <div id="detailModal" class="fixed inset-0 bg-black bg-opacity-70 z-50 flex items-center justify-center p-4 md:p-8 opacity-0 pointer-events-none transition-opacity duration-300">
-        <div class="bg-brand-bg w-full max-w-4xl max-h-[90vh] flex flex-col md:flex-row border border-brand-gold shadow-2xl relative transform scale-95 transition-transform duration-300 overflow-hidden rounded-md" id="detailModalContent">
+        <div class="bg-brand-bg w-full max-w-4xl max-h-[90vh] flex flex-col md:flex-row border border-brand-gold shadow-2xl relative transform scale-95 transition-transform duration-300 overflow-hidden rounded-md custom-scrollbar" id="detailModalContent">
             <button onclick="window.closeDetailModal()" class="absolute top-4 right-4 z-10 bg-white/50 backdrop-blur-sm rounded-full p-1 text-gray-800 hover:bg-white hover:text-red-600 transition-colors shadow">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
             </button>
 
-            <!-- Trái: Khung ảnh Slide -->
             <div class="md:w-1/2 bg-brand-card relative flex items-center justify-center h-64 md:h-auto overflow-hidden group">
                 <div class="absolute inset-0 opacity-10 bg-[linear-gradient(#cda568_1px,transparent_1px),linear-gradient(90deg,#cda568_1px,transparent_1px)] bg-[size:20px_20px]"></div>
                 <img id="detailMainImage" src="" class="w-full h-full object-contain relative z-10 hidden drop-shadow-xl p-4">
@@ -583,18 +586,17 @@
                 <div id="detailImageCounter" class="absolute bottom-3 right-3 z-20 bg-black/50 text-white text-[10px] px-2 py-1 rounded-full hidden tracking-widest font-mono">1/1</div>
             </div>
 
-            <!-- Phải: Thông tin chi tiết -->
-            <div class="md:w-1/2 flex flex-col p-6 md:p-8 bg-brand-bg max-h-[60vh] md:max-h-none overflow-y-auto">
-                <div class="flex-shrink-0 border-b border-brand-border pb-4 mb-4">
-                    <h2 id="detailTitle" class="text-2xl md:text-3xl font-serif font-bold text-brand-dark leading-tight pr-8">Tên Sản Phẩm</h2>
+            <div class="md:w-1/2 flex flex-col p-6 md:p-8 bg-brand-bg max-h-[60vh] md:max-h-none overflow-y-auto custom-scrollbar">
+                <div class="flex-shrink-0 border-b border-brand-border pb-4 mb-4 text-center">
+                    <h2 id="detailTitle" class="text-2xl md:text-3xl font-serif font-bold text-brand-dark leading-tight px-4">Tên Sản Phẩm</h2>
                     <p id="detailPrice" class="text-2xl font-serif font-bold text-red-800 mt-2">Giá</p>
-                    <div class="flex items-center gap-2 text-sm text-gray-500 font-medium uppercase mt-2 tracking-wider text-[11px]">
+                    <div class="flex items-center justify-center gap-2 text-sm text-gray-500 font-medium uppercase mt-2 tracking-wider text-[11px]">
                         <span id="detailPeriod" class="bg-gray-200 px-2 py-0.5 rounded-sm">Triều đại</span>
                         <span id="detailYears" class="text-brand-gold border border-brand-gold px-2 py-0.5 rounded-sm">Năm</span>
                     </div>
                 </div>
                 
-                <div class="flex-grow">
+                <div class="flex-grow text-center">
                     <h4 class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">Thông tin / Nguồn gốc</h4>
                     <p id="detailDesc" class="text-gray-700 text-sm leading-relaxed whitespace-pre-wrap">Mô tả dài...</p>
                 </div>
@@ -609,6 +611,6 @@
         </div>
     </div>
 
-    <script src="./script.js"></script>
+    <script src="./js/script.js"></script>
 </body>
 </html>
