@@ -4,7 +4,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <!-- TÍCH HỢP SEO META TAGS ĐỘNG -->
     <title>Tiền Xu Cổ Việt Nam</title>
+    <!-- Favicon Đồng Xu Cổ -->
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><circle cx=%2250%22 cy=%2250%22 r=%2245%22 fill=%22%23cda568%22 stroke=%22%231c1612%22 stroke-width=%225%22/><rect x=%2235%22 y=%2235%22 width=%2230%22 height=%2230%22 fill=%22none%22 stroke=%22%231c1612%22 stroke-width=%223%22/></svg>">
+    
+    <meta name="description" content="Sưu tầm tiền xu cổ Việt Nam chính hãng, mang lại giá trị sưu tầm và phong thủy cao nhất.">
+    <meta property="og:title" content="Tiền Xu Cổ Việt Nam">
+    <meta property="og:description" content="Sưu tầm tiền xu cổ Việt Nam chính hãng, mang lại giá trị sưu tầm và phong thủy cao nhất.">
+    <meta property="og:image" content="">
+    <meta property="og:type" content="website">
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -80,6 +90,7 @@
                     <li><a href="#" id="nav-home" onclick="window.switchPage('home'); return false;" class="nav-link bg-[#d5a044] text-white px-3 py-1 rounded-full flex items-center gap-1 hover:text-white transition-colors">TRANG CHỦ</a></li>
                     <li><a href="#" id="nav-about" onclick="window.switchPage('about'); return false;" class="nav-link py-1 block hover:text-[#d5a044] transition-colors">GIỚI THIỆU</a></li>
                     <li><a href="#" id="nav-products" onclick="window.switchPage('products'); return false;" class="nav-link py-1 block hover:text-[#d5a044] transition-colors">SẢN PHẨM</a></li>
+                    <li><a href="#" id="nav-tracking" onclick="window.switchPage('tracking'); return false;" class="nav-link py-1 block hover:text-[#d5a044] transition-colors">TRA CỨU ĐƠN</a></li>
                     <li><a href="#" id="nav-news" onclick="window.switchPage('news'); return false;" class="nav-link py-1 block hover:text-[#d5a044] transition-colors">TIN TỨC</a></li>
                     <li><a href="#" id="nav-contact" onclick="window.switchPage('contact'); return false;" class="nav-link py-1 block hover:text-[#d5a044] transition-colors">LIÊN HỆ</a></li>
                 </ul>
@@ -89,7 +100,7 @@
 
     <div id="loadingIndicator" class="py-20 text-center">
         <div class="loader mb-4"></div>
-        <p class="text-gray-500 font-medium">Đang đồng bộ dữ liệu...</p>
+        <p class="text-gray-500 font-medium">Đang load trang... Vui lòng chờ trong giây lát!</p>
     </div>
 
     <div id="publicContainer" class="flex-grow hidden w-full">
@@ -135,6 +146,22 @@
                         Đọc thêm về Văn Minh Việt Sử Hội
                     </button>
                 </div>
+            </div>
+        </section>
+
+        <!-- VIEW TRA CỨU ĐƠN HÀNG TÍCH HỢP -->
+        <section id="view-tracking" class="page-view hidden w-full mx-auto px-4 md:px-8 xl:px-12 2xl:px-16 py-12 max-w-[1200px]">
+            <h2 class="text-3xl font-serif font-bold text-brand-dark mb-6 text-center border-b border-brand-border pb-6">Tra Cứu Đơn Hàng</h2>
+            <div class="bg-[#efe8d7] p-6 md:p-12 rounded-xl shadow-sm border border-[#d8ccb8] text-center">
+                <p class="text-gray-600 text-base md:text-lg mb-8 max-w-4xl mx-auto">Nhập <strong>Mã đơn hàng, Số điện thoại hoặc Tên khách hàng</strong> để tra cứu thông tin và trạng thái vận chuyển.</p>
+                <div class="flex flex-col sm:flex-row gap-4 justify-center max-w-3xl mx-auto">
+                    <input type="text" id="trackingCodeInput" placeholder="Mã đơn, SĐT hoặc Tên..." class="flex-grow px-6 py-3 rounded-full border border-brand-border focus:outline-none focus:border-[#d5a044] text-center sm:text-left font-sans text-base shadow-inner">
+                    <button onclick="window.handleTrackOrder()" class="bg-brand-dark text-brand-gold font-bold py-3 px-8 hover:bg-[#d5a044] hover:text-white transition-colors uppercase text-sm rounded-full whitespace-nowrap shadow-md">
+                        Kiểm Tra Đơn
+                    </button>
+                </div>
+                <!-- Box Hiện Kết quả -->
+                <div id="trackingResult" class="mt-8 hidden min-h-[100px] flex flex-col items-center justify-center"></div>
             </div>
         </section>
 
@@ -206,9 +233,9 @@
         <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center mb-6 border-b pb-4 gap-4">
             <div>
                 <h2 class="text-2xl font-serif font-bold text-brand-dark flex items-center gap-2">
-                    <span id="adminWelcomeName">Bảng Điều Khiển Admin</span>
+                    <span id="adminWelcomeName">Quản lý bán hàng: Admin</span>
                 </h2>
-                <p class="text-sm text-gray-500 mt-1">Hệ quản trị nội dung tự động đồng bộ Google Sheets.</p>
+                <p class="text-sm text-gray-500 mt-1">Kiểm tra, thao tác kĩ trước khi Cập nhật, Thêm, Sửa, Xóa. Hành động sau khi đã thay đổi sẽ không thể hoàn tác.</p>
             </div>
             
             <div class="flex flex-wrap items-center gap-3 w-full lg:w-auto justify-end">
@@ -303,7 +330,7 @@
                         <li><strong>Địa chỉ:</strong> Rạch Giá - An Giang</li>
                         <li><strong>Hotline:</strong> <span class="text-white font-bold">0916 694 438</span> (Zalo)</li>
                         <li><strong>Email:</strong> <a href="mailto:thanhln2@techcombank.com.vn" class="hover:text-brand-gold transition-colors">thanhln2@techcombank.com.vn</a></li>
-                        <li><strong>Facebook:</strong> <a href="https://facebook.com/thanhle123" target="_blank" class="hover:text-brand-gold transition-colors">facebook.com/thanhle123</a></li>
+                        <li><strong>Facebook:</strong> <a href="https://facebook.com/thanhle123" target="_blank" class="fb-dynamic-link hover:text-brand-gold transition-colors fb-dynamic-text">facebook.com/thanhle123</a></li>
                     </ul>
                 </div>
 
@@ -319,10 +346,10 @@
                 <div>
                     <h4 class="text-white font-bold text-base mb-4 uppercase border-b border-gray-500 pb-2 inline-block w-full">Thống kê truy cập</h4>
                     <ul class="space-y-2 mt-4 text-[13px]">
-                        <li class="flex items-center gap-2"><span class="text-gray-400 w-4 text-center">👤</span> Online: 2</li>
-                        <li class="flex items-center gap-2"><span class="text-gray-400 w-4 text-center">👤</span> Hôm nay: 265</li>
-                        <li class="flex items-center gap-2"><span class="text-gray-400 w-4 text-center">👤</span> Hôm qua: 926</li>
-                        <li class="flex items-center gap-2"><span class="text-gray-400 w-4 text-center">👥</span> Tổng số: 1176394</li>
+                        <li class="flex items-center gap-2"><span class="text-gray-400 w-4 text-center">👤</span> Online: <span id="stat-online">2</span></li>
+                        <li class="flex items-center gap-2"><span class="text-gray-400 w-4 text-center">👤</span> Hôm nay: <span id="stat-today">265</span></li>
+                        <li class="flex items-center gap-2"><span class="text-gray-400 w-4 text-center">👤</span> Hôm qua: <span id="stat-yesterday">926</span></li>
+                        <li class="flex items-center gap-2"><span class="text-gray-400 w-4 text-center">👥</span> Tổng số: <span id="stat-total">1.176.394</span></li>
                     </ul>
                 </div>
 
@@ -333,15 +360,15 @@
                                 <img src="https://placehold.co/50x50/efe8d7/1c1612?text=Xu" alt="Shop" class="w-full h-full object-cover">
                             </div>
                             <div>
-                                <h5 class="font-bold text-[#385898] text-[13px] hover:underline cursor-pointer leading-tight line-clamp-1">Shop tiền xu cổ vi...</h5>
+                                <h5 class="font-bold text-[#385898] text-[13px] hover:underline cursor-pointer leading-tight line-clamp-1 fb-dynamic-name" onclick="window.open(document.querySelector('.fb-dynamic-link').href, '_blank')">Shop tiền xu cổ vi...</h5>
                                 <p class="text-[11px] text-gray-500 mt-1">1.130 người theo dõi</p>
                             </div>
                         </div>
                         <div class="flex gap-2">
-                            <button class="bg-[#f5f6f7] border border-[#ccd0d5] text-[#4b4f56] px-2 py-1.5 text-[11px] font-bold flex items-center justify-center flex-1 hover:bg-[#ebedf0] transition-colors rounded-sm">
+                            <button onclick="window.open(document.querySelector('.fb-dynamic-link').href, '_blank')" class="bg-[#f5f6f7] border border-[#ccd0d5] text-[#4b4f56] px-2 py-1.5 text-[11px] font-bold flex items-center justify-center flex-1 hover:bg-[#ebedf0] transition-colors rounded-sm">
                                 <span class="text-[#385898] font-serif font-bold text-sm mr-1.5">f</span> Theo dõi
                             </button>
-                            <button class="bg-[#f5f6f7] border border-[#ccd0d5] text-[#4b4f56] px-2 py-1.5 text-[11px] font-bold flex items-center justify-center flex-1 hover:bg-[#ebedf0] transition-colors rounded-sm">
+                            <button onclick="window.open(document.querySelector('.fb-dynamic-link').href, '_blank')" class="bg-[#f5f6f7] border border-[#ccd0d5] text-[#4b4f56] px-2 py-1.5 text-[11px] font-bold flex items-center justify-center flex-1 hover:bg-[#ebedf0] transition-colors rounded-sm">
                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 mr-1" viewBox="0 0 20 20" fill="currentColor">
                                     <path d="M15 8a3 3 0 10-2.977-2.63l-4.94 2.47a3 3 0 100 4.319l4.94 2.47a3 3 0 10.895-1.789l-4.94-2.47a3.027 3.027 0 000-.74l4.94-2.47C13.456 7.68 14.19 8 15 8z" />
                                 </svg> Chia sẻ
@@ -470,7 +497,7 @@
         </div>
     </div>
 
-    <!-- Modals cho Cart, Order, Detail (Giữ Nguyên) -->
+    <!-- Modals cho Cart, Order, Detail -->
     <div id="cartModal" class="fixed inset-0 bg-black bg-opacity-60 z-[60] opacity-0 pointer-events-none transition-opacity duration-300">
         <div class="absolute inset-y-0 right-0 w-full max-w-md bg-brand-bg shadow-2xl transform translate-x-full transition-transform duration-300 flex flex-col" id="cartContent">
             <div class="px-6 py-4 border-b border-brand-border flex justify-between items-center bg-white">
@@ -566,6 +593,7 @@
         </div>
     </div>
 
+    <!-- Popup xem Sản phẩm -->
     <div id="detailModal" class="fixed inset-0 bg-black bg-opacity-70 z-50 flex items-center justify-center p-4 md:p-8 opacity-0 pointer-events-none transition-opacity duration-300">
         <div class="bg-brand-bg w-full max-w-4xl max-h-[90vh] flex flex-col md:flex-row border border-brand-gold shadow-2xl relative transform scale-95 transition-transform duration-300 overflow-hidden rounded-md custom-scrollbar" id="detailModalContent">
             <button onclick="window.closeDetailModal()" class="absolute top-4 right-4 z-10 bg-white/50 backdrop-blur-sm rounded-full p-1 text-gray-800 hover:bg-white hover:text-red-600 transition-colors shadow">
@@ -611,6 +639,46 @@
         </div>
     </div>
 
-    <script src="./js/script.js"></script>
+    <!-- Popup xem Tin tức -->
+    <div id="newsModal" class="fixed inset-0 bg-black bg-opacity-70 z-50 flex items-center justify-center p-4 md:p-8 opacity-0 pointer-events-none transition-opacity duration-300">
+        <div class="bg-brand-bg w-full max-w-3xl max-h-[90vh] flex flex-col border border-brand-gold shadow-2xl relative transform scale-95 transition-transform duration-300 overflow-hidden rounded-md custom-scrollbar" id="newsModalContent">
+            <button onclick="window.closeNewsModal()" class="absolute top-4 right-4 z-20 bg-white/50 backdrop-blur-sm rounded-full p-1 text-gray-800 hover:bg-white hover:text-red-600 transition-colors shadow">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+            </button>
+
+            <div class="w-full h-48 md:h-64 bg-brand-card relative overflow-hidden flex-shrink-0">
+                <div class="absolute inset-0 opacity-10 bg-[linear-gradient(#cda568_1px,transparent_1px),linear-gradient(90deg,#cda568_1px,transparent_1px)] bg-[size:20px_20px]"></div>
+                <img id="newsDetailImage" src="" class="w-full h-full object-cover relative z-10 hidden drop-shadow-md">
+                <div id="newsDetailSvgFallback" class="w-full h-full flex items-center justify-center relative z-10 hidden">
+                    <svg viewBox="0 0 120 120" class="w-24 h-24 drop-shadow-lg">
+                        <polygon points="60,5 98,20 115,58 98,95 60,115 22,95 5,58 22,20" fill="none" stroke="#cda568" stroke-width="2" opacity="0.5"/>
+                        <polygon points="60,12 91,25 105,58 91,91 60,108 29,91 15,58 29,25" fill="none" stroke="#8c5a2b" stroke-width="1" opacity="0.6"/>
+                        <circle cx="60" cy="60" r="38" fill="#1c1612" stroke="#cda568" stroke-width="3"/>
+                        <text x="60" y="66" font-size="20" font-family="serif" font-weight="bold" text-anchor="middle" fill="#cda568">Tin Tức</text>
+                    </svg>
+                </div>
+            </div>
+
+            <div class="flex flex-col p-6 md:p-8 bg-brand-bg overflow-y-auto custom-scrollbar">
+                <div class="border-b border-brand-border pb-4 mb-4 text-center">
+                    <span id="newsDetailCategory" class="text-xs text-[#d5a044] font-bold uppercase mb-2 block">Danh mục</span>
+                    <h2 id="newsDetailTitle" class="text-2xl md:text-3xl font-serif font-bold text-brand-dark leading-tight">Tiêu đề tin tức</h2>
+                    <p id="newsDetailDate" class="text-xs text-gray-500 mt-2 font-mono">Ngày đăng</p>
+                </div>
+                <div class="text-gray-700 text-sm leading-relaxed whitespace-pre-wrap" id="newsDetailDesc">Nội dung bài viết...</div>
+            </div>
+        </div>
+    </div>
+
+    <script src="./js/config.js"></script>
+    <script src="./js/utils.js"></script>
+    <script src="./js/api.js"></script>
+    <script src="./js/ui-public.js"></script>
+    <script src="./js/search.js"></script>
+    <script src="./js/cart.js"></script>
+    <script src="./js/product.js"></script>
+    <script src="./js/admin.js"></script>
+    <script src="./js/main.js"></script>
+    
 </body>
 </html>
