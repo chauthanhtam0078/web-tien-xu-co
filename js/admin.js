@@ -31,7 +31,6 @@ window.renderImageTags = (key) => {
         let displayId = "Ảnh đã lưu";
         if (url.includes('#')) {
             displayId = decodeURIComponent(url.split('#')[1]);
-            // Tự động lược bỏ các tiền tố sinh ra từ Backend
             displayId = displayId.replace(/^(TXC-P-[A-Z0-9]+-|Others-|GioiThieu-|TinTuc-)/, '');
         } else {
             const match = url.match(/id=([a-zA-Z0-9_-]+)/) || url.match(/d\/([a-zA-Z0-9_-]+)/);
@@ -67,7 +66,7 @@ window.renderImageTags = (key) => {
     html += `   </div>
         <button type="button" onclick="document.getElementById('${state.inputId}').click()" class="bg-white border border-gray-300 text-gray-700 px-5 py-2 rounded-full shadow-sm text-xs font-bold hover:border-brand-gold hover:text-brand-gold transition-colors z-10 relative flex items-center gap-2 mx-auto">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" /></svg>
-            Chọn Ảnh Từ Máy tính
+            Chọn ảnh từ máy tính/điện thoại
         </button>
     </div>`;
 
@@ -203,7 +202,8 @@ window.toggleAdmin = async (forceOpen = false) => {
     if(isAdminActive || forceOpen) {
         isAdminActive = true;
         document.getElementById('publicContainer').classList.add('hidden'); document.getElementById('adminSection').classList.remove('hidden');
-        document.getElementById('adminWelcomeName').innerText = `Quản lý bán hàng: Admin ${loggedInUser.username}`;
+        // UPDATE TÊN ADMIN THÀNH MÀU ĐỎ ĐẬM, IN HOA
+        document.getElementById('adminWelcomeName').innerHTML = `Quản lý bán hàng: <strong class="text-red-700 font-extrabold uppercase drop-shadow-sm ml-1">Admin ${loggedInUser.username}</strong>`;
         buildAdminInterface(); window.scrollTo({ top: 0, behavior: 'smooth' });
     } else {
         document.getElementById('adminSection').classList.add('hidden'); document.getElementById('publicContainer').classList.remove('hidden');
@@ -488,7 +488,7 @@ function renderAdminOrders() {
             <tr>
                 <th class="px-4 py-3 w-10 text-center">STT</th>
                 <th class="px-4 py-3 w-44">Mã Đơn / Thời gian</th>
-                <th class="px-4 py-3 w-[24rem]">Thông thư khách hàng</th>
+                <th class="px-4 py-3 w-[24rem]">Thông tin khách hàng</th>
                 <th class="px-4 py-3">Sản phẩm</th>
                 <th class="px-4 py-3 font-sans w-28">Tổng Tiền</th>
                 <th class="px-4 py-3 text-center w-64">Trạng thái</th>
