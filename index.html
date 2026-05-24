@@ -90,8 +90,8 @@
                     <li><a href="#" id="nav-home" onclick="window.switchPage('home'); return false;" class="nav-link bg-[#d5a044] text-white px-3 py-1 rounded-full flex items-center gap-1 hover:text-white transition-colors">TRANG CHỦ</a></li>
                     <li><a href="#" id="nav-about" onclick="window.switchPage('about'); return false;" class="nav-link py-1 block hover:text-[#d5a044] transition-colors">GIỚI THIỆU</a></li>
                     <li><a href="#" id="nav-products" onclick="window.switchPage('products'); return false;" class="nav-link py-1 block hover:text-[#d5a044] transition-colors">SẢN PHẨM</a></li>
-                    <li><a href="#" id="nav-tracking" onclick="window.switchPage('tracking'); return false;" class="nav-link py-1 block hover:text-[#d5a044] transition-colors">TRA CỨU ĐƠN</a></li>
                     <li><a href="#" id="nav-news" onclick="window.switchPage('news'); return false;" class="nav-link py-1 block hover:text-[#d5a044] transition-colors">TIN TỨC</a></li>
+                    <li><a href="#" id="nav-tracking" onclick="window.switchPage('tracking'); return false;" class="nav-link py-1 block hover:text-[#d5a044] transition-colors">TRA CỨU ĐƠN</a></li>
                     <li><a href="#" id="nav-contact" onclick="window.switchPage('contact'); return false;" class="nav-link py-1 block hover:text-[#d5a044] transition-colors">LIÊN HỆ</a></li>
                 </ul>
             </div>
@@ -273,6 +273,17 @@
 
             <div id="viewProducts" class="admin-view hidden">
                 <div class="grid grid-cols-1 lg:grid-cols-4 gap-8">
+                    <div class="lg:col-span-3">
+                        <h3 class="font-bold text-brand-dark mb-4 uppercase tracking-wider text-sm flex justify-between"><span>Kho Hàng Hiện Tại</span><span id="productCountBadge" class="bg-brand-gold text-white px-2 py-0.5 rounded text-xs">0</span></h3>
+                        <div class="overflow-x-auto border border-brand-border custom-scrollbar">
+                            <table class="w-full text-left text-sm min-w-[600px]">
+                                <thead class="bg-brand-card text-gray-700 border-b border-brand-border">
+                                    <tr><th class="px-4 py-3 font-semibold">Hình ảnh</th><th class="px-4 py-3 font-semibold">Tên SP</th><th class="px-4 py-3 font-semibold">Giá</th><th class="px-4 py-3 font-semibold text-center text-blue-800">Tồn Kho</th><th class="px-4 py-3 font-semibold text-center w-32">Hành động</th></tr>
+                                </thead>
+                                <tbody id="adminTableBody" class="divide-y divide-gray-200"></tbody>
+                            </table>
+                        </div>
+                    </div>
                     <div class="lg:col-span-1 bg-brand-bg p-6 rounded border border-brand-border h-fit">
                         <h3 class="font-bold text-brand-dark mb-4 uppercase tracking-wider text-sm">Thêm Sản Phẩm Mới</h3>
                         <form id="adminAddForm" onsubmit="window.handleAddProduct(event)" class="space-y-4">
@@ -296,17 +307,6 @@
                                 <span>+ LƯU SẢN PHẨM</span>
                             </button>
                         </form>
-                    </div>
-                    <div class="lg:col-span-3">
-                        <h3 class="font-bold text-brand-dark mb-4 uppercase tracking-wider text-sm flex justify-between"><span>Kho Hàng Hiện Tại</span><span id="productCountBadge" class="bg-brand-gold text-white px-2 py-0.5 rounded text-xs">0</span></h3>
-                        <div class="overflow-x-auto border border-brand-border custom-scrollbar">
-                            <table class="w-full text-left text-sm min-w-[600px]">
-                                <thead class="bg-brand-card text-gray-700 border-b border-brand-border">
-                                    <tr><th class="px-4 py-3 font-semibold">Hình ảnh</th><th class="px-4 py-3 font-semibold">Tên SP</th><th class="px-4 py-3 font-semibold">Giá</th><th class="px-4 py-3 font-semibold text-center text-blue-800">Tồn Kho</th><th class="px-4 py-3 font-semibold text-center w-32">Hành động</th></tr>
-                                </thead>
-                                <tbody id="adminTableBody" class="divide-y divide-gray-200"></tbody>
-                            </table>
-                        </div>
                     </div>
                 </div>
             </div>
