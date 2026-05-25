@@ -193,12 +193,13 @@ function updateDynamicFooter() {
         document.querySelectorAll('.fb-dynamic-name').forEach(el => el.innerText = fbName);
     }
 
-    if (!localStorage.getItem('tienxu_stat_reset_v4')) {
+    // Khởi tạo bộ đếm MỚI: Reset toàn bộ về 1 tính từ hôm nay (Xóa bỏ các con số ảo)
+    if (!localStorage.getItem('tienxu_stat_real_reset_v1')) {
         localStorage.setItem('tienxu_stat_total', '1');
         localStorage.setItem('tienxu_stat_today', '1');
         localStorage.setItem('tienxu_stat_yesterday', '0');
         localStorage.setItem('tienxu_stat_date', new Date().toDateString());
-        localStorage.setItem('tienxu_stat_reset_v4', 'true');
+        localStorage.setItem('tienxu_stat_real_reset_v1', 'true');
         sessionStorage.setItem('tienxu_visited', 'true');
     }
 
@@ -209,14 +210,16 @@ function updateDynamicFooter() {
     let dateStr = new Date().toDateString();
     let savedDate = localStorage.getItem('tienxu_stat_date');
 
+    // Chuyển ngày mới: Cập nhật hôm qua và reset hôm nay về 0 (để chuẩn bị cộng 1)
     if (savedDate !== dateStr) {
         yesterday = today;
-        today = 1;
+        today = 0; 
         localStorage.setItem('tienxu_stat_date', dateStr);
         localStorage.setItem('tienxu_stat_yesterday', yesterday);
         sessionStorage.removeItem('tienxu_visited'); 
     }
     
+    // Nếu là lượt truy cập đầu tiên trong session hiện tại
     if(!sessionStorage.getItem('tienxu_visited')) {
         today++;
         total++;
