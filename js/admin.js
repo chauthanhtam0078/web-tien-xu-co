@@ -240,7 +240,7 @@ window.toggleAdmin = async (forceOpen = false) => {
     if(window.isAdminActive || forceOpen) {
         window.isAdminActive = true;
         document.getElementById('publicContainer').classList.add('hidden'); document.getElementById('adminSection').classList.remove('hidden');
-        document.getElementById('adminWelcomeName').innerHTML = `Quản lý bán hàng: <strong class="text-red-700 font-extrabold uppercase drop-shadow-sm ml-1">Admin ${window.loggedInUser.username}</strong>`;
+        document.getElementById('adminWelcomeName').innerHTML = `Quản lý bán hàng: <strong class="text-red-700 font-extrabold uppercase drop-shadow-sm ml-1">${window.loggedInUser.username}</strong>`;
         window.buildAdminInterface(); window.scrollTo({ top: 0, behavior: 'smooth' });
     } else {
         document.getElementById('adminSection').classList.add('hidden'); document.getElementById('publicContainer').classList.remove('hidden');
@@ -261,7 +261,7 @@ window.buildAdminInterface = function() {
         firstTab = 'Dashboard'; renderDashboard();
     }
 
-    if((perms.includes('admin') || perms.includes('vouchers')) && contentContainer) {
+    if((perms.includes('admin') || perms.includes('vouchers') || perms.includes('voucher')) && contentContainer) {
         if(!document.getElementById('viewVouchers')) {
             const vView = document.createElement('div');
             vView.id = 'viewVouchers'; vView.className = 'admin-view hidden';
@@ -291,7 +291,8 @@ window.buildAdminInterface = function() {
     }
 
     Object.keys(window.PERMISSION_MAP || {}).forEach(key => {
-        if(perms.includes(key) || perms.includes(key.replace(/s$/,'')) || perms.includes('admin')) {
+        const lowerKey = key.toLowerCase();
+        if(perms.includes(lowerKey) || perms.includes(lowerKey.replace(/s$/,'')) || perms.includes('admin')) {
             const mapData = window.PERMISSION_MAP[key];
             
             tabsContainer.innerHTML += `<div id="tab${mapData.id}" onclick="window.switchAdminTab('${mapData.id}')" class="admin-tab whitespace-nowrap">${mapData.label}</div>`;
