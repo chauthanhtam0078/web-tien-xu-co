@@ -6,10 +6,33 @@
 window.currentProductPage = 1;
 const PRODUCTS_PER_PAGE = 12;
 
+// --- [HÀM XEM ẢNH GỐC] Kích hoạt Lightbox khi nhấp vào hình ảnh ---
+window.viewFullImage = (src) => {
+    if (!src) return;
+    let fullSrc = src;
+    // Tự động chuyển link từ Thumbnail (sz=w1000) sang Ảnh gốc độ phân giải cao nhất (sz=s0)
+    if (fullSrc.includes('thumbnail?id=')) {
+        fullSrc = fullSrc.replace(/&sz=w\d+/, '&sz=s0'); 
+    }
+    const viewerModal = document.getElementById('imageViewerModal');
+    const viewerImg = document.getElementById('imageViewerImg');
+    if (viewerModal && viewerImg) {
+        viewerImg.src = fullSrc;
+        viewerModal.classList.remove('hidden');
+        viewerModal.classList.add('flex');
+    }
+};
+
 window.formatTitleCase = (str) => {
     if(!str) return "";
     let formatted = str.trim().replace(/\s+/g, ' ').replace(/\s*,\s*/g, ', ').replace(/\s*-\s*/g, '-').replace(/\s*\/\s*/g, '/');
     return formatted.toLowerCase().replace(/(?:^|[\s,\-\/\.])\S/g, match => match.toUpperCase());
+};
+
+window.validateInput = (phone, email) => {
+    if (phone && !/^0\d{9}$/.test(phone)) return "Số điện thoại phải bao gồm đúng 10 chữ số và bắt đầu bằng số 0!";
+    if (email && !email.includes('@')) return "Email không hợp lệ (phải chứa ký tự @)!";
+    return null;
 };
 
 window.switchPage = (pageId, pushState = true) => {
@@ -97,6 +120,9 @@ window.switchPage = (pageId, pushState = true) => {
     }
 };
 
+window.currentNewsImages = [];
+window.currentNewsIndex = 0;
+
 window.openNewsDetail = (id) => {
     let news = (window.globalAllNews || []).find(n => n.id == id);
     if (!news) return;
@@ -111,35 +137,68 @@ window.openNewsDetail = (id) => {
     descEl.innerHTML = formattedDesc;
     descEl.classList.add('rich-text-display');
 
-    const imgEl = document.getElementById('newsDetailImage');
-    const svgEl = document.getElementById('newsDetailSvgFallback');
+    window.currentNewsImages = news.images && news.images.length > 0 ? news.images : [];
+    if (window.currentNewsImages.length === 0 && news.image) window.currentNewsImages = [news.image];
+    window.currentNewsIndex = 0;
     
-    if (news.image && news.image.trim() !== '') {
-        const urls = window.getSafeImgUrls(news.image);
-        imgEl.src = urls.primary;
-        imgEl.onerror = function() {
-            if (!this.dataset.retried && urls.fallback) {
-                this.dataset.retried = 'true';
-                this.src = urls.fallback;
-            } else {
-                this.classList.add('hidden');
-                svgEl.classList.remove('hidden');
-            }
-        };
-        imgEl.classList.remove('hidden');
-        svgEl.classList.add('hidden');
-    } else {
-        imgEl.classList.add('hidden');
-        svgEl.classList.remove('hidden');
-    }
+    window.updateNewsImageDisplay();
 
     let cleanText = typeof window.stripHTMLForSearch === 'function' ? window.stripHTMLForSearch(formattedDesc) : formattedDesc;
-    window.updateSEOMeta(`${news.title} | Tiền Xu Cổ`, cleanText.substring(0, 150) + '...', news.image);
+    const seoImg = window.currentNewsImages.length > 0 ? window.currentNewsImages[0] : '';
+    window.updateSEOMeta(`${news.title} | Tiền Xu Cổ`, cleanText.substring(0, 150) + '...', seoImg);
 
     document.getElementById('newsModal').classList.remove('opacity-0', 'pointer-events-none');
     document.getElementById('newsModalContent').classList.remove('scale-95');
     document.body.classList.add('modal-open');
 };
+
+window.updateNewsImageDisplay = () => {
+    const imgEl = document.getElementById('newsDetailImage');
+    const svgEl = document.getElementById('newsDetailSvgFallback');
+    const prevBtn = document.getElementById('newsPrevBtn');
+    const nextBtn = document.getElementById('newsNextBtn');
+    const counter = document.getElementById('newsImageCounter');
+
+    if (window.currentNewsImages.length > 0 && window.currentNewsImages[window.currentNewsIndex].trim() !== '') {
+        const safeUrls = typeof window.getSafeImgUrls === 'function' ? window.getSafeImgUrls(window.currentNewsImages[window.currentNewsIndex]) : {primary: window.currentNewsImages[window.currentNewsIndex], fallback: ''};
+        
+        imgEl.src = safeUrls.primary;
+        imgEl.dataset.retried = ""; 
+        imgEl.onerror = function() {
+            if (!this.dataset.retried && safeUrls.fallback) {
+                this.dataset.retried = 'true';
+                this.src = safeUrls.fallback;
+            } else {
+                this.classList.add('hidden');
+                if (svgEl) svgEl.classList.remove('hidden');
+            }
+        };
+        imgEl.classList.remove('hidden');
+        if (svgEl) svgEl.classList.add('hidden');
+
+        if (window.currentNewsImages.length > 1) {
+            if(prevBtn) prevBtn.classList.remove('hidden'); 
+            if(nextBtn) nextBtn.classList.remove('hidden'); 
+            if(counter) {
+                counter.classList.remove('hidden');
+                counter.innerText = `${window.currentNewsIndex + 1}/${window.currentNewsImages.length}`;
+            }
+        } else {
+            if(prevBtn) prevBtn.classList.add('hidden'); 
+            if(nextBtn) nextBtn.classList.add('hidden'); 
+            if(counter) counter.classList.add('hidden');
+        }
+    } else {
+        imgEl.classList.add('hidden'); 
+        if(prevBtn) prevBtn.classList.add('hidden'); 
+        if(nextBtn) nextBtn.classList.add('hidden'); 
+        if(counter) counter.classList.add('hidden');
+        if (svgEl) svgEl.classList.remove('hidden');
+    }
+};
+
+window.newsNextImage = () => { if (window.currentNewsImages.length <= 1) return; window.currentNewsIndex = (window.currentNewsIndex + 1) % window.currentNewsImages.length; window.updateNewsImageDisplay(); };
+window.newsPrevImage = () => { if (window.currentNewsImages.length <= 1) return; window.currentNewsIndex = (window.currentNewsIndex - 1 + window.currentNewsImages.length) % window.currentNewsImages.length; window.updateNewsImageDisplay(); };
 
 window.closeNewsModal = () => {
     document.getElementById('newsModal').classList.add('opacity-0', 'pointer-events-none');
@@ -156,17 +215,18 @@ window.renderNewsData = function() {
 
     const dataToRender = window.globalNews || [];
     container.innerHTML = dataToRender.map(n => {
-        let urls = window.getSafeImgUrls(n.image);
+        let firstImg = n.images && n.images.length > 0 ? n.images[0] : n.image;
+        let urls = window.getSafeImgUrls(firstImg);
         let cleanText = typeof window.stripHTMLForSearch === 'function' ? window.stripHTMLForSearch(n.desc) : n.desc;
         
         return `<div class="w-full md:w-[calc(33.333%_-_1.333rem)] xl:w-[calc(25%_-_1.5rem)] bg-white border border-gray-200 rounded-sm overflow-hidden hover:shadow-md transition group cursor-pointer flex flex-col" onclick="window.openNewsDetail('${n.id}')">
             <div class="w-full aspect-video bg-[#f8f5ee] relative overflow-hidden flex items-center justify-center border-b border-brand-border">
-                ${urls.primary ? `<img src="${urls.primary}" loading="lazy" onerror="if(!this.dataset.retried && '${urls.fallback}') { this.dataset.retried='true'; this.src='${urls.fallback}'; } else { this.style.display='none'; this.nextElementSibling.style.display='flex'; }" class="absolute inset-0 w-full h-full object-cover bg-white group-hover:scale-105 transition duration-500 z-10"><div class="absolute inset-0 hidden items-center justify-center z-0">${fallbackNewsSVG}</div>` : fallbackNewsSVG}
+                ${urls.primary ? `<img src="${urls.primary}" loading="lazy" onerror="if(!this.dataset.retried && '${urls.fallback}') { this.dataset.retried='true'; this.src='${urls.fallback}'; } else { this.style.display='none'; this.nextElementSibling.style.display='flex'; }" class="absolute inset-0 w-full h-full object-contain p-1 group-hover:scale-105 transition duration-500 z-10"><div class="absolute inset-0 hidden items-center justify-center z-0">${fallbackNewsSVG}</div>` : fallbackNewsSVG}
             </div>
             <div class="p-5 flex-grow text-center"><span class="text-xs text-[#d5a044] font-bold uppercase mb-2 block">${n.category}</span><h4 class="font-bold text-lg mb-2 group-hover:text-[#8c5a2b] transition">${n.title}</h4><p class="text-gray-600 text-sm line-clamp-3">${cleanText}</p></div>
         </div>`
     }).join('');
-}
+};
 
 window.renderPublicGrid = function(appendMode = false) {
     const featuredGrid = document.getElementById('featuredProductGrid');
@@ -215,7 +275,7 @@ window.renderPublicGrid = function(appendMode = false) {
         let voucherBadge = (p.vouchers && p.vouchers.trim() !== '') ? `<div class="absolute bottom-2 left-2 bg-red-50 text-red-600 border border-red-200 text-[10px] font-bold px-2 py-0.5 rounded-sm z-20 shadow-sm flex items-center gap-1">🎟️ ${p.vouchers}</div>` : '';
 
         let imageHTML = urls.primary !== '' 
-            ? `<img src="${urls.primary}" loading="lazy" onerror="if(!this.dataset.retried && '${urls.fallback}') { this.dataset.retried='true'; this.src='${urls.fallback}'; } else { this.style.display='none'; this.nextElementSibling.style.display='flex'; }" alt="${p.name}" class="absolute inset-0 w-full h-full object-cover bg-white group-hover:scale-105 transition-transform duration-500 z-10"><div class="absolute inset-0 hidden items-center justify-center z-0 group-hover:scale-105 transition-transform duration-500">${fallbackSVG}</div>` 
+            ? `<img src="${urls.primary}" loading="lazy" onerror="if(!this.dataset.retried && '${urls.fallback}') { this.dataset.retried='true'; this.src='${urls.fallback}'; } else { this.style.display='none'; this.nextElementSibling.style.display='flex'; }" alt="${p.name}" class="absolute inset-0 w-full h-full object-contain group-hover:scale-105 transition-transform duration-500 z-10"><div class="absolute inset-0 hidden items-center justify-center z-0 group-hover:scale-105 transition-transform duration-500">${fallbackSVG}</div>` 
             : fallbackSVG;
 
         let cleanText = typeof window.stripHTMLForSearch === 'function' ? window.stripHTMLForSearch(p.desc) : p.desc;
@@ -246,7 +306,7 @@ window.renderPublicGrid = function(appendMode = false) {
             loadMoreBtn.innerHTML = '';
         }
     }
-}
+};
 
 window.loadMoreProducts = function() {
     window.currentProductPage++;
@@ -254,29 +314,48 @@ window.loadMoreProducts = function() {
 };
 
 
+window.aboutImages = [];
+window.aboutImageIndex = 0;
+
 window.renderAboutData = function() {
     const container = document.getElementById('aboutContainer');
     if (!container) return;
     const info = window.globalAbout || {};
     if (!info || Object.keys(info).length === 0) return;
 
-    let firstImg = info.images && info.images.length > 0 ? info.images[0] : info.image;
+    window.aboutImages = info.images && info.images.length > 0 ? info.images : (info.image ? [info.image] : []);
+    window.aboutImageIndex = 0;
+
     let imgHtml = '';
     
-    if (firstImg && firstImg.trim() !== '') {
-        let urls = window.getSafeImgUrls(firstImg);
-        imgHtml = `<div class="relative w-full aspect-video rounded-sm overflow-hidden shadow-sm border border-brand-border">
-            <img src="${urls.primary}" loading="lazy" class="w-full h-full object-cover" onerror="if(!this.dataset.retried && '${urls.fallback}') { this.dataset.retried='true'; this.src='${urls.fallback}'; } else { this.style.display='none'; }">
+    let fallbackAboutSVG = `
+        <div class="w-full h-full absolute inset-0 bg-[#efe8d7] overflow-hidden flex items-center justify-center z-0">
+            <div class="absolute inset-0 opacity-10 bg-[linear-gradient(#cda568_1px,transparent_1px),linear-gradient(90deg,#cda568_1px,transparent_1px)] bg-[size:15px_15px]"></div>
+            <div class="relative flex items-center justify-center gap-2">
+                <div class="w-20 h-20 rounded-full border-[3px] border-[#cda568] bg-[#1c1612] flex items-center justify-center text-[#cda568] opacity-80 transform -rotate-12 translate-x-4 shadow-md"><span class="font-serif text-2xl font-bold">寶</span></div>
+                <div class="w-32 h-32 rounded-full border-[4px] border-[#cda568] bg-[#1c1612] flex items-center justify-center text-[#cda568] z-10 shadow-2xl"><span class="font-serif text-5xl font-bold">古</span></div>
+                <div class="w-24 h-24 rounded-full border-[3px] border-[#cda568] bg-[#1c1612] flex items-center justify-center text-[#cda568] opacity-90 transform rotate-12 -translate-x-4 shadow-lg"><span class="font-serif text-3xl font-bold">錢</span></div>
+            </div>
+        </div>`;
+
+    if (window.aboutImages.length > 0 && window.aboutImages[0].trim() !== '') {
+        let urls = window.getSafeImgUrls(window.aboutImages[0]);
+        imgHtml = `
+        <div class="relative w-full aspect-video shadow-lg rounded-sm border border-brand-border overflow-hidden bg-[#f8f5ee] min-h-[300px] group">
+            <img id="aboutMainImage" src="${urls.primary}" loading="lazy" class="absolute inset-0 w-full h-full object-contain p-2 z-10 cursor-pointer" onclick="window.viewFullImage(this.src)" title="Bấm để xem ảnh gốc" onerror="if(!this.dataset.retried && '${urls.fallback}') { this.dataset.retried='true'; this.src='${urls.fallback}'; } else { this.style.display='none'; this.nextElementSibling.style.display='flex'; }">
+            <div id="aboutSvgFallback" class="absolute inset-0 hidden items-center justify-center z-0">${fallbackAboutSVG}</div>
+            <button id="aboutPrevBtn" onclick="window.prevAboutImage()" class="absolute left-2 top-1/2 -translate-y-1/2 z-20 bg-black/40 hover:bg-brand-gold text-white p-2 rounded-full ${window.aboutImages.length > 1 ? '' : 'hidden'} transition">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clip-rule="evenodd" /></svg>
+            </button>
+            <button id="aboutNextBtn" onclick="window.nextAboutImage()" class="absolute right-2 top-1/2 -translate-y-1/2 z-20 bg-black/40 hover:bg-brand-gold text-white p-2 rounded-full ${window.aboutImages.length > 1 ? '' : 'hidden'} transition">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd" /></svg>
+            </button>
+            <div id="aboutImageCounter" class="absolute bottom-3 right-3 z-20 bg-black/50 text-white text-[10px] px-2 py-1 rounded-full ${window.aboutImages.length > 1 ? '' : 'hidden'} tracking-widest font-mono">1/${window.aboutImages.length}</div>
         </div>`;
     } else {
         imgHtml = `
-        <div class="relative w-full aspect-[4/3] sm:aspect-video rounded-sm shadow-sm border border-brand-border bg-[#f8f5ee] flex flex-col items-center justify-center overflow-hidden p-8">
-            <div class="absolute inset-0 opacity-40 bg-[linear-gradient(#e5e7eb_1px,transparent_1px),linear-gradient(90deg,#e5e7eb_1px,transparent_1px)] bg-[size:15px_15px]"></div>
-            <div class="relative z-10 flex items-center justify-center drop-shadow-xl">
-                <div class="w-16 h-16 md:w-20 md:h-20 rounded-full bg-[#4a3f35] border-[3px] border-[#cda568] flex items-center justify-center text-[#cda568] font-serif font-bold text-xl shadow-lg transform translate-x-4 z-0">寶</div>
-                <div class="w-24 h-24 md:w-28 md:h-28 rounded-full bg-[#1c1612] border-[4px] border-[#cda568] flex items-center justify-center text-[#cda568] font-serif font-bold text-4xl shadow-2xl z-10">古</div>
-                <div class="w-16 h-16 md:w-20 md:h-20 rounded-full bg-[#4a3f35] border-[3px] border-[#cda568] flex items-center justify-center text-[#cda568] font-serif font-bold text-xl shadow-lg transform -translate-x-4 z-0">錢</div>
-            </div>
+        <div class="relative w-full aspect-[4/3] sm:aspect-video rounded-sm shadow-sm border border-brand-border bg-[#f8f5ee] flex flex-col items-center justify-center overflow-hidden min-h-[300px]">
+            ${fallbackAboutSVG}
         </div>`;
     }
 
@@ -301,6 +380,42 @@ window.renderAboutData = function() {
             <ul class="space-y-3 mt-2">${bulletsHtml}</ul>
         </div>
     `;
+};
+
+window.updateAboutImageDisplay = () => {
+    const imgEl = document.getElementById('aboutMainImage');
+    const svgEl = document.getElementById('aboutSvgFallback');
+    const counter = document.getElementById('aboutImageCounter');
+    
+    if (window.aboutImages.length > 0 && window.aboutImages[window.aboutImageIndex].trim() !== '') {
+        let urls = window.getSafeImgUrls(window.aboutImages[window.aboutImageIndex]);
+        imgEl.src = urls.primary;
+        imgEl.dataset.retried = ""; 
+        imgEl.onerror = function() {
+            if (!this.dataset.retried && urls.fallback) {
+                this.dataset.retried = 'true';
+                this.src = urls.fallback;
+            } else {
+                this.classList.add('hidden');
+                if (svgEl) svgEl.classList.remove('hidden');
+            }
+        };
+        imgEl.classList.remove('hidden');
+        if (svgEl) svgEl.classList.add('hidden');
+        if (counter) counter.innerText = `${window.aboutImageIndex + 1}/${window.aboutImages.length}`;
+    }
+};
+
+window.nextAboutImage = () => {
+    if (window.aboutImages.length <= 1) return;
+    window.aboutImageIndex = (window.aboutImageIndex + 1) % window.aboutImages.length;
+    window.updateAboutImageDisplay();
+};
+
+window.prevAboutImage = () => {
+    if (window.aboutImages.length <= 1) return;
+    window.aboutImageIndex = (window.aboutImageIndex - 1 + window.aboutImages.length) % window.aboutImages.length;
+    window.updateAboutImageDisplay();
 };
 
 window.renderContactData = function() {
@@ -342,17 +457,61 @@ window.renderContactData = function() {
 };
 
 window.updateDynamicFooter = function() {
-    const fbContact = (window.globalAllContacts || []).find(c => c.key.toLowerCase().includes('facebook') || c.key.toLowerCase() === 'fb');
-    if (fbContact && fbContact.value) {
-        let cleanText = typeof window.stripHTMLForSearch === 'function' ? window.stripHTMLForSearch(fbContact.value) : fbContact.value;
-        const fbUrl = cleanText.trim();
-        const fbName = fbUrl.replace(/^https?:\/\/(www\.)?facebook\.com\//, '').split('/')[0] || 'Fanpage Văn Minh Sử Hội';
-        const actualUrl = fbUrl.startsWith('http') ? fbUrl : `https://${fbUrl}`;
+    const contacts = window.globalAllContacts || [];
+    
+    let address = 'Rạch Giá - An Giang';
+    let phone = '0916 694 438';
+    let email = 'thanhln2@techcombank.com.vn';
+    let fbVal = 'https://facebook.com/thanhle123';
+    let zaloUrl = 'https://zalo.me/0916694438';
+    let messengerUrl = 'https://m.me/thanhle123';
+
+    contacts.forEach(c => {
+        let k = c.key.toLowerCase();
+        let val = typeof window.stripHTMLForSearch === 'function' ? window.stripHTMLForSearch(c.value).trim() : c.value.replace(/<[^>]*>?/gm, '').trim();
         
-        document.querySelectorAll('.fb-dynamic-link').forEach(el => el.href = actualUrl);
-        document.querySelectorAll('.fb-dynamic-text').forEach(el => el.innerText = fbUrl);
-        document.querySelectorAll('.fb-dynamic-name').forEach(el => el.innerText = fbName);
+        if (k.includes('địa chỉ') || k.includes('address')) address = val;
+        else if (k.includes('điện thoại') || k.includes('phone') || k.includes('hotline') || k.includes('sđt')) {
+            phone = val;
+            let cleanPhone = phone.replace(/[^\d]/g, '');
+            zaloUrl = `https://zalo.me/${cleanPhone}`;
+        }
+        else if (k.includes('email') || k.includes('mail')) email = val;
+        else if (k.includes('facebook') || k.includes('fb')) fbVal = val;
+        else if (k.includes('zalo')) zaloUrl = val;
+        else if (k.includes('messenger') || k.includes('msg')) messengerUrl = val;
+    });
+
+    const headerHotline = document.getElementById('headerHotline');
+    if (headerHotline) headerHotline.innerText = phone;
+
+    const footerAddress = document.getElementById('footerAddress');
+    if (footerAddress) footerAddress.innerText = address;
+
+    const footerPhone = document.getElementById('footerPhone');
+    if (footerPhone) footerPhone.innerText = phone;
+
+    const footerEmail = document.getElementById('footerEmail');
+    if (footerEmail) {
+        footerEmail.innerText = email;
+        footerEmail.href = `mailto:${email}`;
     }
+
+    const fbUrl = fbVal.startsWith('http') ? fbVal : `https://${fbVal}`;
+    const fbName = fbUrl.replace(/^https?:\/\/(www\.)?facebook\.com\//, '').split('/')[0] || 'Văn Minh Việt Sử Hội';
+    
+    document.querySelectorAll('.fb-dynamic-link').forEach(el => el.href = fbUrl);
+    document.querySelectorAll('.fb-dynamic-text').forEach(el => el.innerText = fbVal);
+    document.querySelectorAll('.fb-dynamic-name').forEach(el => el.innerText = fbName);
+
+    const footerBtnCall = document.getElementById('footerBtnCall');
+    if (footerBtnCall) footerBtnCall.href = `tel:${phone.replace(/[^\d]/g, '')}`;
+
+    const footerBtnZalo = document.getElementById('footerBtnZalo');
+    if (footerBtnZalo) footerBtnZalo.href = zaloUrl.startsWith('http') ? zaloUrl : `https://${zaloUrl}`;
+
+    const footerBtnMessenger = document.getElementById('footerBtnMessenger');
+    if (footerBtnMessenger) footerBtnMessenger.href = messengerUrl.startsWith('http') ? messengerUrl : `https://${messengerUrl}`;
 
     let online = window.globalVisitors ? window.globalVisitors.online : (Math.floor(Math.random() * 5) + 2);
     let today = window.globalVisitors ? window.globalVisitors.today : 0;
@@ -584,14 +743,23 @@ window.submitCustomerLogin = async function(e) {
 
 window.submitCustomerRegister = async function(e) {
     e.preventDefault();
+    const phone = document.getElementById('cusRegPhone').value.trim();
+    const email = document.getElementById('cusRegEmail').value.trim();
+    
+    const err = window.validateInput(phone, email);
+    if(err) {
+        window.showToast(err, "error");
+        return;
+    }
+
     const btn = e.target.querySelector('button[type="submit"]');
     const spinner = btn.querySelector('.spinner-icon');
     btn.disabled = true; spinner.classList.remove('hidden');
 
     const data = {
         name: window.formatTitleCase(document.getElementById('cusRegName').value),
-        phone: document.getElementById('cusRegPhone').value.trim(),
-        email: document.getElementById('cusRegEmail').value.trim(),
+        phone: phone,
+        email: email,
         password: document.getElementById('cusRegPassword').value.trim(),
         address: '' 
     };
@@ -634,8 +802,8 @@ window.openProfileEditModal = function() {
     document.getElementById('profileEmailList').innerHTML = '';
     document.getElementById('profileAddressList').innerHTML = '';
     
-    const emails = window.loggedCustomer.email ? window.loggedCustomer.email.split('\n-----\n').filter(Boolean) : [];
-    const addresses = window.loggedCustomer.address ? window.loggedCustomer.address.split('\n-----\n').filter(Boolean) : [];
+    const emails = window.loggedCustomer.email ? window.loggedCustomer.email.split('\n').filter(Boolean) : [];
+    const addresses = window.loggedCustomer.address ? window.loggedCustomer.address.split('\n').filter(Boolean) : [];
 
     if (emails.length === 0) window.addProfileInput('email');
     else emails.forEach(e => window.addProfileInput('email', e));
@@ -659,8 +827,8 @@ window.addProfileInput = function(type, value = '') {
     const div = document.createElement('div');
     div.className = "flex items-center gap-2 mb-2";
     const inputHtml = type === 'email' 
-        ? `<input type="email" placeholder="Nhập email..." value="${value}" class="profile-email-input w-full px-3 py-2 text-sm border border-gray-300 rounded focus:border-brand-gold outline-none">`
-        : `<textarea placeholder="Nhập địa chỉ..." rows="2" class="profile-address-input w-full px-3 py-2 text-sm border border-gray-300 rounded focus:border-brand-gold outline-none resize-none">${value}</textarea>`;
+        ? `<input type="email" placeholder="Nhập email..." value="${value}" class="profile-email-input w-full px-3 py-2 text-sm border border-gray-300 rounded focus:border-brand-gold outline-none" onkeydown="if(event.key==='Enter')event.preventDefault();">`
+        : `<input type="text" placeholder="Nhập địa chỉ..." value="${value}" class="profile-address-input w-full px-3 py-2 text-sm border border-gray-300 rounded focus:border-brand-gold outline-none" onkeydown="if(event.key==='Enter')event.preventDefault();">`;
     
     div.innerHTML = `
         ${inputHtml}
@@ -673,16 +841,17 @@ window.addProfileInput = function(type, value = '') {
 
 window.submitProfileEdit = async function(e) {
     e.preventDefault();
-    const btn = e.target.querySelector('button[type="submit"]');
-    const spinner = btn.querySelector('.spinner-icon');
-    const textSpan = btn.querySelectorAll('span')[1];
-    const oldText = textSpan.innerText;
     
-    textSpan.innerText = "ĐANG LƯU..."; btn.disabled = true; spinner.classList.remove('hidden');
-
     const emailInputs = document.querySelectorAll('.profile-email-input');
-    let emails = [];
-    emailInputs.forEach(input => { if(input.value.trim()) emails.push(input.value.trim().toLowerCase()); });
+    let emails = []; let hasEmailError = false;
+    emailInputs.forEach(input => { 
+        let val = input.value.trim().toLowerCase();
+        if(val) {
+            if(!val.includes('@')) hasEmailError = true;
+            emails.push(val); 
+        }
+    });
+    if(hasEmailError) { window.showToast("Có Email không hợp lệ!", "error"); return; }
     emails = [...new Set(emails)];
 
     const addressInputs = document.querySelectorAll('.profile-address-input');
@@ -690,10 +859,17 @@ window.submitProfileEdit = async function(e) {
     addressInputs.forEach(input => { if(input.value.trim()) addresses.push(window.formatTitleCase(input.value)); });
     addresses = [...new Set(addresses)];
 
+    const btn = e.target.querySelector('button[type="submit"]');
+    const spinner = btn.querySelector('.spinner-icon');
+    const textSpan = btn.querySelectorAll('span')[1];
+    const oldText = textSpan.innerText;
+    
+    textSpan.innerText = "ĐANG LƯU..."; btn.disabled = true; spinner.classList.remove('hidden');
+
     const data = {
         phone: window.loggedCustomer.phone,
-        email: emails.join('\n-----\n'),
-        address: addresses.join('\n-----\n')
+        email: emails.join('\n'),
+        address: addresses.join('\n')
     };
 
     try {
@@ -727,8 +903,15 @@ window.renderProfilePage = function() {
     document.getElementById('profileAvatar').innerText = window.loggedCustomer.name.charAt(0).toUpperCase();
     document.getElementById('profilePhone').innerText = window.loggedCustomer.phone;
     
-    let emailHtml = window.loggedCustomer.email ? window.loggedCustomer.email.split('\n-----\n').filter(Boolean).map(e => `<span class="bg-gray-100 px-2 py-0.5 rounded text-gray-700 font-medium">${e}</span>`).join('') : "Chưa cập nhật";
-    let addressHtml = window.loggedCustomer.address ? window.loggedCustomer.address.split('\n-----\n').filter(Boolean).map(a => `<span class="bg-gray-100 px-2 py-1 rounded text-gray-700 font-medium">${a}</span>`).join('') : "Chưa cập nhật";
+    if (window.loggedCustomer.level) {
+        document.getElementById('profileLevelBadge').innerText = window.loggedCustomer.level;
+        document.getElementById('profileLevelBadge').classList.remove('hidden');
+    } else {
+        document.getElementById('profileLevelBadge').classList.add('hidden');
+    }
+
+    let emailHtml = window.loggedCustomer.email ? window.loggedCustomer.email.split('\n').filter(Boolean).map(e => `<span class="bg-gray-100 px-2 py-0.5 rounded text-gray-700 font-medium">${e}</span>`).join('') : "Chưa cập nhật";
+    let addressHtml = window.loggedCustomer.address ? window.loggedCustomer.address.split('\n').filter(Boolean).map(a => `<span class="bg-gray-100 px-2 py-1 rounded text-gray-700 font-medium">${a}</span>`).join('') : "Chưa cập nhật";
 
     document.getElementById('profileEmail').innerHTML = emailHtml;
     document.getElementById('profileAddress').innerHTML = addressHtml;
@@ -761,85 +944,27 @@ window.renderProfilePage = function() {
 
             let pNames = (o.product || "").toString().split('\n');
             let pQtys = (o.qty || "").toString().split(/,|\n/); 
-            let separator = (o.detail || "").includes('\n-----\n') ? '\n-----\n' : '\n';
-            let pDetails = (o.detail || "").toString().split(separator);
-
-            let fallbackShip = '0đ';
-
-            // XÂY DỰNG CHI TIẾT TỪNG SẢN PHẨM
-            let productsHTML = pNames.map((name, i) => {
+            
+            let itemsHtml = pNames.map((name, i) => {
                 let q = pQtys[i] ? parseInt(pQtys[i].toString().trim()) || 1 : 1;
-                let d = pDetails[i] ? pDetails[i].toString().trim() : '';
                 let nameStr = name.includes('SL:') ? name.trim() : `SL: ${q} x ${name.trim()}`;
-                
-                let productBoxes = '';
-                if (d) {
-                    let lines = d.split(/<br\s*\/?>|\n/);
-                    let giaGoc = '';
-                    let chietKhauVoucher = [];
-                    
-                    lines.forEach(line => {
-                        let trimmed = line.trim();
-                        if (trimmed.includes('Giá gốc:')) giaGoc = trimmed.split('Giá gốc:')[1].trim();
-                        else if (trimmed.includes('Chiết khấu')) chietKhauVoucher.push({ label: trimmed.split(':')[0].trim(), val: trimmed.split(':')[1].trim(), color: 'text-orange-600' });
-                        else if (trimmed.includes('Voucher')) chietKhauVoucher.push({ label: trimmed.split(':')[0].trim(), val: trimmed.split(':')[1].trim(), color: 'text-green-600' });
-                        else if (trimmed.includes('Ship:')) fallbackShip = trimmed.split('Ship:')[1].trim(); 
-                    });
-
-                    if (giaGoc) {
-                        productBoxes += `<div class="text-[12px] bg-white border border-gray-200 rounded p-2.5 mt-2 shadow-sm flex justify-between items-center"><span class="text-gray-500">Giá gốc:</span> <strong class="font-sans text-gray-800">${giaGoc}</strong></div>`;
-                    }
-                    
-                    if (chietKhauVoucher.length > 0) {
-                        productBoxes += `<div class="text-[12px] bg-white border border-gray-200 rounded p-2.5 mt-1.5 shadow-sm space-y-1.5">`;
-                        chietKhauVoucher.forEach(cv => {
-                            productBoxes += `<div class="flex justify-between items-center"><span class="text-gray-500">${cv.label}:</span> <strong class="font-sans ${cv.color}">${cv.val}</strong></div>`;
-                        });
-                        productBoxes += `</div>`;
-                    }
-                }
-                return `<div class="mb-5 last:mb-2"><span class="text-brand-dark font-bold text-[13px]">${nameStr}</span>${productBoxes}</div>`;
+                return `<li class="text-sm text-gray-700 py-1">${nameStr}</li>`;
             }).join('');
 
-            // XÂY DỰNG KHUNG CHUNG DƯỚI CÙNG CHO PHÍ SHIP VÀ GHI CHÚ
-            let finalShip = (o.note2 && o.note2.trim() !== '') ? o.note2 : fallbackShip;
-            
-            let globalBoxes = `<div class="text-[12px] bg-[#f0f9ff] border border-[#bae6fd] rounded p-2.5 mt-4 shadow-sm flex justify-between items-center">
-                <span class="text-blue-800 font-bold uppercase tracking-wider text-[11px]">Phí Giao Hàng:</span> <strong class="font-sans text-blue-700">${finalShip}</strong>
-            </div>`;
-
-            if (o.notes) {
-                globalBoxes += `<div class="text-[12px] bg-[#fffbeb] border border-[#fde68a] rounded p-3 mt-1.5 shadow-sm">
-                    <span class="text-yellow-800 font-bold uppercase tracking-wider text-[11px] block mb-1">📝 Ghi Chú Đơn Hàng:</span> 
-                    <span class="text-gray-700 italic leading-relaxed">${o.notes}</span>
-                </div>`;
-            }
-
-            productsHTML += `<div class="border-t border-gray-200 border-dashed pt-1">${globalBoxes}</div>`;
-            
             resultHtml += `
-            <div class="bg-white border border-[#d8ccb8] p-5 md:p-6 rounded-md text-left shadow-sm relative hover:shadow-md transition-shadow">
-                <div class="absolute top-5 right-5 text-[11px] font-bold px-3 py-1.5 rounded border ${statusColor} shadow-sm uppercase tracking-wider">${o.status || 'Chưa Giao Hàng'}</div>
-                <div class="mb-6 border-b border-gray-100 pb-5 pr-36">
-                    <p class="text-brand-dark font-bold text-xl mb-1">${o.order_code}</p>
-                    <p class="text-sm text-gray-500 font-mono flex items-center gap-1"><svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg> ${o.date}</p>
+            <div class="bg-white border border-gray-200 p-5 rounded-md shadow-sm relative">
+                <div class="absolute top-5 right-5 text-[11px] font-bold px-2 py-1 rounded border ${statusColor} uppercase">${o.status || 'Chưa Giao Hàng'}</div>
+                <div class="mb-3 border-b border-gray-100 pb-3 pr-24">
+                    <p class="text-brand-dark font-bold text-lg leading-none">${o.order_code}</p>
+                    <p class="text-xs text-gray-500 mt-1">${o.date}</p>
                 </div>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 text-sm mb-6">
-                    <div class="bg-gray-50 p-4 rounded border border-gray-100 h-full">
-                        <p class="text-xs text-gray-500 mb-2 uppercase tracking-wider font-bold">Người nhận</p>
-                        <p class="font-bold text-gray-800 text-base mb-1">${o.customer}</p>
-                        <p class="font-bold text-[#8c5a2b] font-sans text-base mb-2">${o.phone}</p>
-                        <p class="text-gray-600 leading-relaxed">${o.address}</p>
+                <ul class="mb-3 list-disc list-inside border-b border-gray-100 pb-3">${itemsHtml}</ul>
+                <div class="flex justify-between items-end">
+                    <div>
+                        <p class="text-[11px] uppercase tracking-wider text-gray-500 font-bold mb-1">Thanh toán</p>
+                        <p class="text-xs font-bold ${payColor}">${displayMethod}</p>
                     </div>
-                    <div class="bg-gray-50 p-4 rounded border border-gray-100 h-full flex flex-col justify-center">
-                        <p class="text-xs text-gray-500 mb-2 uppercase tracking-wider font-bold">Thanh toán</p>
-                        <p class="font-bold text-red-700 font-sans text-2xl mb-2">${o.total}</p>
-                        <p class="text-[13px] font-bold ${payColor}">${displayMethod}</p>
-                    </div>
-                </div>
-                <div class="border-t border-gray-100 pt-5">
-                    <p class="text-xs text-gray-500 mb-3 uppercase tracking-wider font-bold flex items-center gap-1.5"><svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" /></svg> Chi tiết sản phẩm</p>
-                    <div class="text-[14px] bg-[#f8f5ee] p-4 md:p-5 rounded border border-[#d8ccb8] shadow-inner">${productsHTML}</div>
+                    <p class="font-bold text-red-700 font-sans text-xl">${o.total}</p>
                 </div>
             </div>`;
         });

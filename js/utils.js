@@ -169,29 +169,10 @@ window.buildSafeImage = (url, classes, fallbackText = 'LỖI', fallbackSize = '4
 };
 
 // Hàm nén ảnh để trả về thêm tên gốc của hình ảnh (Dùng định tuyến trên thư mục Drive)
-const compressImage = (file, maxWidth = 800, quality = 0.7) => new Promise((resolve, reject) => {
+window.compressImage = (file, maxWidth = 800, quality = 0.7) => new Promise((resolve, reject) => {
     const reader = new FileReader();
     reader.readAsDataURL(file);
-    reader.onload = (event) => {
-        const img = new Image();
-        img.src = event.target.result;
-        img.onload = () => {
-            const canvas = document.createElement('canvas');
-            let width = img.width, height = img.height;
-            if (width > maxWidth) {
-                height = Math.round((height * maxWidth) / width);
-                width = maxWidth;
-            }
-            canvas.width = width;
-            canvas.height = height;
-            const ctx = canvas.getContext('2d');
-            ctx.drawImage(img, 0, 0, width, height);
-            resolve({
-                data: canvas.toDataURL(file.type, quality),
-                name: file.name
-            });
-        };
-    };
+    reader.onload = () => resolve({ name: file.name, data: reader.result });
     reader.onerror = error => reject(error);
 });
 
@@ -266,10 +247,10 @@ window.getSafeImgUrls = (url) => {
     if (match && match[1]) {
         const id = match[1];
         return {
-            // Dùng Thumbnail làm link chính vì cực kỳ ổn định, không bị chặn ẩn danh
-            primary: `https://drive.google.com/thumbnail?id=${id}&sz=w1000`, 
-            // Dùng uc làm dự phòng cho trường hợp ảnh vừa up lên Drive chưa kịp sinh ra Thumbnail
-            fallback: `https://drive.google.com/uc?export=view&id=${id}`
+            // Lh3 load ảnh ngay lập tức sau khi up, không bị lỗi Cookie hay chờ tạo Thumbnail
+            primary: `https://lh3.googleusercontent.com/d/${id}`, 
+            // Thumbnail làm dự phòng cho ảnh cũ
+            fallback: `https://drive.google.com/thumbnail?id=${id}&sz=w1000`
         };
     }
     return { primary: cleanUrl, fallback: '' };

@@ -4,7 +4,7 @@
 // ============================================================================
 
 // 1. CẤU HÌNH API URL GIAO TIẾP VỚI SERVER
-const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzL0z5KEDNqEigoPhkEF4xvpllbgRsmQe0FQx2HdGg1TCfPJDK5gm5LjnAZ4Jeb6nClgw/exec';
+const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbynXbCM1xZ15CBEM_xu7K56wjerTyGQInoaDktm3yyn8upOghwD3rX9SHCEiTGxK4h0-w/exec';
 
 // 2. KHAI BÁO BIẾN STATE TOÀN CỤC (Gắn thẳng vào window để chống mọi lỗi đụng độ)
 window.globalProducts = [];

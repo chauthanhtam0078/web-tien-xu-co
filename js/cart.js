@@ -303,20 +303,50 @@ window.checkoutCart = () => {
     window.currentVoucher = null;
     if(document.getElementById('voucherCodeInput')) document.getElementById('voucherCodeInput').value = '';
     if(document.getElementById('voucherMessage')) document.getElementById('voucherMessage').classList.add('hidden');
-    window.renderOrderSummary();
 
-    // AUTO-FILL DATA NẾU KHÁCH HÀNG ĐÃ ĐĂNG NHẬP
-    if (window.loggedCustomer) {
-        setTimeout(() => {
-            const form = document.getElementById('orderForm');
-            if(form) {
-                form.querySelector('input[name="customer_name"]').value = window.loggedCustomer.name || '';
-                form.querySelector('input[name="phone"]').value = window.loggedCustomer.phone || '';
-                form.querySelector('input[name="email"]').value = window.loggedCustomer.email || '';
-                form.querySelector('textarea[name="address"]').value = window.loggedCustomer.address || '';
-            }
-        }, 100);
+    // AUTO-FILL DATA TỪ TÀI KHOẢN KHÁCH HÀNG (CÓ LISTBOX CHỌN NHIỀU EMAIL/ADDRESS & AUTO VOUCHER)
+    const emailContainer = document.getElementById('checkoutEmailContainer');
+    const addressContainer = document.getElementById('checkoutAddressContainer');
+    const form = document.getElementById('orderForm');
+    
+    if (window.loggedCustomer && form) {
+        form.querySelector('input[name="customer_name"]').value = window.loggedCustomer.name || '';
+        form.querySelector('input[name="phone"]').value = window.loggedCustomer.phone || '';
+        
+        // Auto apply voucher nếu có
+        if (window.loggedCustomer.voucher && window.loggedCustomer.voucher.trim() !== '') {
+            document.getElementById('voucherCodeInput').value = window.loggedCustomer.voucher.trim();
+            window.applyVoucher();
+        }
+
+        // Render Listbox cho Email
+        const emails = window.loggedCustomer.email ? window.loggedCustomer.email.split('\n').filter(Boolean) : [];
+        if (emails.length > 1) {
+            let options = emails.map(e => `<option value="${e}">${e}</option>`).join('');
+            emailContainer.innerHTML = `<select name="email" class="w-full px-4 py-2 text-sm border border-brand-border focus:ring-1 focus:ring-brand-gold outline-none rounded-sm bg-white"><option value="">-- Chọn Email (Hoặc để trống) --</option>${options}</select>`;
+        } else {
+            emailContainer.innerHTML = `<input type="email" name="email" value="${emails[0]||''}" placeholder="Email (Tuỳ chọn)" class="w-full px-4 py-2 text-sm border border-brand-border focus:ring-1 focus:ring-brand-gold outline-none rounded-sm" onkeydown="if(event.key==='Enter')event.preventDefault();">`;
+        }
+
+        // Render Listbox cho Địa Chỉ
+        const addresses = window.loggedCustomer.address ? window.loggedCustomer.address.split('\n').filter(Boolean) : [];
+        if (addresses.length > 1) {
+            let options = addresses.map(a => `<option value="${a}">${a}</option>`).join('');
+            addressContainer.innerHTML = `<select name="address" required class="w-full px-4 py-2 text-sm border border-brand-border focus:ring-1 focus:ring-brand-gold outline-none rounded-sm bg-white">${options}</select>`;
+        } else {
+            addressContainer.innerHTML = `<textarea name="address" required rows="2" placeholder="Địa chỉ giao hàng chi tiết *" class="w-full px-4 py-2 text-sm border border-brand-border focus:ring-1 focus:ring-brand-gold resize-none outline-none rounded-sm" onkeydown="if(event.key==='Enter')event.preventDefault();">${addresses[0]||''}</textarea>`;
+        }
+    } else {
+        // Reset về input trắng nếu không đăng nhập
+        if(form) {
+            form.querySelector('input[name="customer_name"]').value = '';
+            form.querySelector('input[name="phone"]').value = '';
+        }
+        emailContainer.innerHTML = `<input type="email" name="email" placeholder="Email (Tuỳ chọn)" class="w-full px-4 py-2 text-sm border border-brand-border focus:ring-1 focus:ring-brand-gold outline-none rounded-sm" onkeydown="if(event.key==='Enter')event.preventDefault();">`;
+        addressContainer.innerHTML = `<textarea name="address" required rows="2" placeholder="Địa chỉ giao hàng chi tiết *" class="w-full px-4 py-2 text-sm border border-brand-border focus:ring-1 focus:ring-brand-gold resize-none outline-none rounded-sm" onkeydown="if(event.key==='Enter')event.preventDefault();"></textarea>`;
     }
+
+    window.renderOrderSummary();
 
     document.getElementById('orderModal').classList.remove('opacity-0', 'pointer-events-none');
     document.getElementById('modalContent').classList.remove('scale-95');
@@ -340,9 +370,14 @@ window.togglePaymentInfo = () => {
 window.submitOrder = async (event) => {
     event.preventDefault();
     if(window.cart.length === 0) return typeof window.showToast === 'function' && window.showToast("Giỏ hàng đang trống!", "error");
-    if(typeof SCRIPT_URL === 'undefined' || SCRIPT_URL.includes('AKfycbyc9b2iKk') || SCRIPT_URL.includes('DÁN_ĐƯỜNG_LINK')) return typeof window.showToast === 'function' && window.showToast("Chưa cấu hình SCRIPT_URL kết nối Server!", "error");
-
+    
     const formData = new FormData(event.target);
+    const phone = formData.get('phone').trim();
+    const email = formData.get('email') ? formData.get('email').trim() : "";
+    
+    const err = window.validateInput(phone, email);
+    if(err) return typeof window.showToast === 'function' && window.showToast(err, "error");
+
     const btn = document.getElementById('submitOrderBtn');
     const spinner = btn.querySelector('.spinner-icon');
     const btnText = btn.querySelector('.btn-text');
@@ -388,9 +423,10 @@ window.submitOrder = async (event) => {
     if (finalTotal < 0) finalTotal = 0;
 
     const orderData = {
+        ma_kh: window.loggedCustomer ? window.loggedCustomer.ma_kh : "",
         customer_name: formData.get('customer_name'),
-        phone: formData.get('phone'),
-        email: formData.get('email'),
+        phone: phone,
+        email: email,
         address: formData.get('address'),
         notes: formData.get('notes'),
         payment_method: formData.get('payment_method'),
@@ -419,7 +455,6 @@ window.submitOrder = async (event) => {
         const result = await response.json();
         
         if (result.success) {
-            // TẠO DANH SÁCH CHI TIẾT SẠCH SẼ MỚI HIỂN THỊ TRONG LỊCH SỬ ĐƠN HÀNG   
             let detailList = [];
             window.cart.forEach(cartItem => {
                 let item = window.getLatestProductData(cartItem);
@@ -436,7 +471,6 @@ window.submitOrder = async (event) => {
                 detailList.push(detailString);
             });
 
-            // Gắn Mã giảm giá duy nhất vào 1 sản phẩm thỏa điều kiện (nếu có)
             if (window.currentVoucher && voucherDiscount > 0) {
                 let vString = `\nVoucher (${window.currentVoucher.code}): -${formatCurr(voucherDiscount)}`;
                 for(let i = detailList.length - 1; i >= 0; i--) {
@@ -448,11 +482,11 @@ window.submitOrder = async (event) => {
                 }
             }
 
-            // Gắn tạm data vào Local để giao diện cập nhật ngay lập tức
             if (!window.globalOrders) window.globalOrders = [];
             window.globalOrders.unshift({
                 order_code: "Đang cập nhật...",
                 date: "Vừa xong",
+                ma_kh: window.loggedCustomer ? window.loggedCustomer.ma_kh : "",
                 customer: orderData.customer_name,
                 phone: orderData.phone,
                 address: orderData.address,
@@ -486,7 +520,9 @@ window.submitOrder = async (event) => {
 
             localStorage.removeItem('tienxu_cached_webdata');
             if(typeof window.fetchAllData === 'function') setTimeout(window.fetchAllData, 2500); 
-        } else { if(typeof window.showToast === 'function') window.showToast("Lỗi từ máy chủ: " + result.message, "error"); }
+        } else { 
+            if(typeof window.showToast === 'function') window.showToast(result.message || "Lỗi từ máy chủ!", "error"); 
+        }
     } catch (error) { if(typeof window.showToast === 'function') window.showToast("Lỗi mạng, vui lòng thử lại sau.", "error"); } 
     finally { btn.disabled = false; spinner.classList.add('hidden'); btnText.innerText = 'ĐẶT HÀNG NGAY'; }
 };

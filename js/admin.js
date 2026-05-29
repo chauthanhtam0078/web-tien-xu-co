@@ -10,7 +10,6 @@ window.imageManagers = {
     univ: { oldImages: [], newFiles: [], deletedImages: [], containerId: 'ueImageTagsContainer', inputId: 'ue_image' }
 };
 
-// --- [HÀM DÙNG CHUNG] TỐI ƯU HÓA HTML BẢNG QUẢN TRỊ ---
 window.wrapAdminTable = (theadHtml, tbodyHtml, colSpan, customTableClass = "w-full text-left text-sm") => {
     let html = `<div class="overflow-x-auto border border-brand-border rounded custom-scrollbar"><table class="${customTableClass}"><thead class="bg-brand-card text-gray-700"><tr>${theadHtml}</tr></thead><tbody class="divide-y divide-gray-200">`;
     if(!tbodyHtml) html += `<tr><td colspan="${colSpan}" class="px-4 py-8 text-center text-gray-500">Chưa có dữ liệu</td></tr>`;
@@ -19,7 +18,6 @@ window.wrapAdminTable = (theadHtml, tbodyHtml, colSpan, customTableClass = "w-fu
     return html;
 };
 
-// --- [HÀM DÙNG CHUNG] TỐI ƯU HÓA CỤM NÚT SỬA/XÓA ---
 window.buildActionButtons = (sheetName, id, editTxt = "Sửa", delTxt = "Xóa", customEditFn = null) => {
     let editClick = customEditFn ? customEditFn : `window.openUniversalEdit('${sheetName}', '${id}')`;
     let editBtn = `<button onclick="${editClick}" class="text-blue-500 hover:text-blue-700 bg-blue-50 px-2 py-1 rounded text-xs mr-1 font-semibold border border-blue-200">${editTxt}</button>`;
@@ -128,7 +126,7 @@ window.renderImageTags = (key) => {
     state.newFiles.forEach((file, i) => {
         const previewUrl = URL.createObjectURL(file);
         html += `<div class="flex items-center gap-1.5 bg-blue-50 border border-blue-200 px-2 py-1.5 rounded shadow-sm transition hover:bg-blue-100">
-            <img src="${previewUrl}" class="w-8 h-8 object-contain bg-white rounded border border-blue-200" onload="URL.revokeObjectURL(this.src)">
+            <img src="${previewUrl}" class="w-8 h-8 object-contain bg-white rounded border border-blue-200" onload="window.URL.revokeObjectURL(this.src)">
             <span class="text-[11px] text-blue-800 font-semibold truncate max-w-[120px]" title="${file.name}">${file.name}</span>
             <button type="button" onclick="window.removeImage('${key}', 'new', ${i})" class="text-red-500 hover:bg-red-100 w-5 h-5 rounded-full flex items-center justify-center font-bold transition">×</button>
         </div>`;
@@ -427,15 +425,19 @@ function renderAdminUsers() {
     const q = window.adminSearchQuery;
     const filtered = (window.globalUsers || []).filter(u => !q || (u.name||"").toLowerCase().includes(q) || (u.phone||"").toLowerCase().includes(q) || (u.email||"").toLowerCase().includes(q));
     
-    let thead = `<th class="px-4 py-3 w-12 text-center">STT</th><th class="px-4 py-3">Tên Khách Hàng</th><th class="px-4 py-3">SĐT</th><th class="px-4 py-3">Email</th><th class="px-4 py-3">Địa chỉ</th><th class="px-4 py-3 text-center">Hành động</th>`;
+    let thead = `<th class="px-4 py-3 w-12 text-center">STT</th><th class="px-4 py-3">Tên Khách Hàng</th><th class="px-4 py-3">SĐT</th><th class="px-4 py-3">Email</th><th class="px-4 py-3">Địa chỉ</th><th class="px-4 py-3 text-center">Thống Kê</th><th class="px-4 py-3 text-center">Hành động</th>`;
     let tbody = '';
     filtered.forEach((u, index) => {
-        let emailHtml = u.email ? u.email.split('\n-----\n').map(e => `<span class="block mb-1 bg-gray-100 px-1 rounded">${e}</span>`).join('') : '';
-        let addressHtml = u.address ? u.address.split('\n-----\n').map(a => `<span class="block mb-1 bg-gray-100 px-1 rounded">${a}</span>`).join('') : '';
+        let emailHtml = u.email ? u.email.split('\n').map(e => `<span class="block mb-1 bg-gray-100 px-1 rounded">${e}</span>`).join('') : '';
+        let addressHtml = u.address ? u.address.split('\n').map(a => `<span class="block mb-1 bg-gray-100 px-1 rounded">${a}</span>`).join('') : '';
         
-        tbody += `<tr class="hover:bg-gray-50 align-top"><td class="px-4 py-3 text-center font-bold text-gray-500">${index + 1}</td><td class="px-4 py-3 font-bold">${u.name} <span class="text-[10px] text-gray-400 block">${u.ma_kh || ""}</span></td><td class="px-4 py-3">${u.phone}</td><td class="px-4 py-3 text-gray-500 text-xs">${emailHtml}</td><td class="px-4 py-3 truncate max-w-[200px] text-xs whitespace-normal">${addressHtml}</td><td class="px-4 py-3 text-center whitespace-nowrap">${window.buildActionButtons('Users', u.id)}</td></tr>`;
+        let statsHtml = `<span class="block text-xs">Đơn: <strong class="text-brand-dark">${u.orders_count || 0}</strong></span>
+                         <span class="block text-xs">Cấp: <strong class="text-blue-600">${u.level || 'Chưa có'}</strong></span>
+                         <span class="block text-xs">Mã: <strong class="text-red-600">${u.voucher || 'Không'}</strong></span>`;
+
+        tbody += `<tr class="hover:bg-gray-50 align-top"><td class="px-4 py-3 text-center font-bold text-gray-500">${index + 1}</td><td class="px-4 py-3 font-bold">${u.name} <span class="text-[10px] text-gray-400 block">${u.ma_kh || ""}</span></td><td class="px-4 py-3">${u.phone}</td><td class="px-4 py-3 text-gray-500 text-xs">${emailHtml}</td><td class="px-4 py-3 truncate max-w-[200px] text-xs whitespace-normal">${addressHtml}</td><td class="px-4 py-3 whitespace-nowrap">${statsHtml}</td><td class="px-4 py-3 text-center whitespace-nowrap">${window.buildActionButtons('Users', u.id)}</td></tr>`;
     });
-    view.innerHTML = `<div class="p-6">${window.wrapAdminTable(thead, tbody, 6)}</div>`;
+    view.innerHTML = `<div class="p-6">${window.wrapAdminTable(thead, tbody, 7)}</div>`;
 }
 
 function renderAdminNews() {
@@ -831,8 +833,14 @@ window.openUniversalEdit = (sheetName, id) => {
         const u = (window.globalUsers || []).find(x => x.id == id); title = `Khách Hàng: ${u.name}`;
         html += `<div><label class="text-xs font-bold text-gray-600 mb-1 block">Tên Khách Hàng</label><input type="text" id="ue_name" value="${u.name}" required class="w-full px-3 py-2 border rounded-sm focus:border-brand-gold outline-none"></div>`;
         html += `<div><label class="text-xs font-bold text-gray-600 mb-1 block">SĐT</label><input type="text" id="ue_phone" value="${u.phone}" required class="w-full px-3 py-2 border rounded-sm focus:border-brand-gold outline-none"></div>`;
-        html += `<div><label class="text-xs font-bold text-gray-600 mb-1 block">Email (Các email cách nhau bởi \\n-----\\n)</label><textarea id="ue_email" rows="3" class="w-full px-3 py-2 border rounded-sm focus:border-brand-gold outline-none">${u.email}</textarea></div>`;
-        html += `<div><label class="text-xs font-bold text-gray-600 mb-1 block">Địa Chỉ (Các địa chỉ cách nhau bởi \\n-----\\n)</label><textarea id="ue_address" rows="3" required class="w-full px-3 py-2 border rounded-sm focus:border-brand-gold outline-none resize-none">${u.address}</textarea></div>`;
+        html += `<div><label class="text-xs font-bold text-gray-600 mb-1 block">Email (Các email cách nhau bởi \\n)</label><textarea id="ue_email" rows="3" class="w-full px-3 py-2 border rounded-sm focus:border-brand-gold outline-none">${u.email}</textarea></div>`;
+        html += `<div><label class="text-xs font-bold text-gray-600 mb-1 block">Địa Chỉ (Các địa chỉ cách nhau bởi \\n)</label><textarea id="ue_address" rows="3" required class="w-full px-3 py-2 border rounded-sm focus:border-brand-gold outline-none resize-none">${u.address}</textarea></div>`;
+        
+        html += `<div class="grid grid-cols-3 gap-4 mt-2">
+                    <div><label class="text-xs font-bold text-gray-600 mb-1 block">Tổng Đơn</label><input type="number" id="ue_orders_count" value="${u.orders_count || 0}" class="w-full px-3 py-2 border rounded-sm focus:border-brand-gold outline-none"></div>
+                    <div><label class="text-xs font-bold text-gray-600 mb-1 block">Cấp Độ</label><input type="text" id="ue_level" value="${u.level || ''}" class="w-full px-3 py-2 border rounded-sm focus:border-brand-gold outline-none"></div>
+                    <div><label class="text-xs font-bold text-gray-600 mb-1 block">Ưu Đãi</label><input type="text" id="ue_voucher" value="${u.voucher || ''}" class="w-full px-3 py-2 border rounded-sm focus:border-brand-gold outline-none"></div>
+                 </div>`;
     } else if (sheetName === 'Info') {
         const i = window.globalAbout || {}; title = `Sửa Giới Thiệu`;
         if (window.imageManagers && window.imageManagers.univ) {
@@ -842,7 +850,7 @@ window.openUniversalEdit = (sheetName, id) => {
         html += `<div><label class="text-xs font-bold text-gray-600 mb-1 block">Tiêu Đề</label><input type="text" id="ue_title" value="${i.title || ''}" required class="w-full px-3 py-2 border rounded-sm focus:border-brand-gold outline-none"></div>`;
         html += `<div><label class="text-xs font-bold text-gray-600 mb-1 block">Đoạn Văn</label><textarea id="ue_paras" rows="6" required class="w-full px-3 py-2 border rounded-sm focus:border-brand-gold outline-none">${(i.paragraphs || []).join('\n')}</textarea></div>`;
         html += `<div><label class="text-xs font-bold text-gray-600 mb-1 block">Dấu Đầu Dòng</label><textarea id="ue_bullets" rows="4" required class="w-full px-3 py-2 border rounded-sm focus:border-brand-gold outline-none">${(i.bullets || []).join('\n')}</textarea></div>`;
-        html += `<div><label class="text-xs font-bold text-gray-600 mb-1 block">Quản Lý Ảnh</label><input type="file" id="ue_image" accept="image/*" multiple class="hidden"></div>`;
+        html += `<div><label class="text-xs font-bold text-gray-600 mb-1 block">Quản Lý Ảnh</label><input type="file" id="ue_image" accept="image/*" multiple class="w-full px-3 py-2 border border-brand-border bg-white focus:ring-1 focus:ring-brand-gold outline-none text-xs rounded-sm"></div>`;
     } else if (sheetName === 'News') {
         const n = (window.globalAllNews || []).find(x => x.id == id); title = `Cập Nhật Tin Tức`;
         if (window.imageManagers && window.imageManagers.univ && n) {
@@ -852,7 +860,7 @@ window.openUniversalEdit = (sheetName, id) => {
         html += `<div><label class="text-xs font-bold text-gray-600 mb-1 block">Phân Loại</label><input type="text" id="ue_category" value="${n ? n.category : ''}" required class="w-full px-3 py-2 border rounded-sm focus:border-brand-gold outline-none"></div>`;
         html += `<div><label class="text-xs font-bold text-gray-600 mb-1 block">Tiêu Đề</label><input type="text" id="ue_title" value="${n ? n.title : ''}" required class="w-full px-3 py-2 border rounded-sm focus:border-brand-gold outline-none"></div>`;
         html += `<div><label class="text-xs font-bold text-gray-600 mb-1 block">Nội dung</label><textarea id="ue_desc" rows="5" required class="w-full px-3 py-2 border rounded-sm focus:border-brand-gold outline-none">${n ? n.desc : ''}</textarea></div>`;
-        html += `<div><label class="text-xs font-bold text-gray-600 mb-1 block">Quản Lý Ảnh</label><input type="file" id="ue_image" accept="image/*" multiple class="hidden"></div>`;
+        html += `<div><label class="text-xs font-bold text-gray-600 mb-1 block">Quản Lý Ảnh</label><input type="file" id="ue_image" accept="image/*" multiple class="w-full px-3 py-2 border border-brand-border bg-white focus:ring-1 focus:ring-brand-gold outline-none text-xs rounded-sm"></div>`;
     } else if (sheetName === 'Contact') {
         const c = (window.globalAllContacts || []).find(x => x.id == id); title = `Cập Nhật Liên Hệ`;
         html += `<div><label class="text-xs font-bold text-gray-600 mb-1 block">Mục</label><input type="text" value="${c ? c.key : ''}" readonly class="w-full px-3 py-2 border bg-gray-50 rounded-sm outline-none cursor-not-allowed"></div>`;
@@ -916,7 +924,13 @@ window.submitUniversalEdit = async (e) => {
     const currentEditId = window.currentEditId;
 
     if (currentEditSheet === 'Users') {
-        updates[3] = document.getElementById('ue_name').value; updates[4] = document.getElementById('ue_address').value; updates[5] = document.getElementById('ue_phone').value; updates[6] = document.getElementById('ue_email').value;
+        updates[3] = document.getElementById('ue_name').value; 
+        updates[4] = document.getElementById('ue_address').value; 
+        updates[5] = document.getElementById('ue_phone').value; 
+        updates[6] = document.getElementById('ue_email').value;
+        updates[8] = document.getElementById('ue_orders_count').value;
+        updates[9] = document.getElementById('ue_level').value;
+        updates[10] = document.getElementById('ue_voucher').value;
     } else if (currentEditSheet === 'Info') {
         updates[1] = document.getElementById('ue_title').value; updates[2] = document.getElementById('ue_paras').value; updates[3] = document.getElementById('ue_bullets').value;
     } else if (currentEditSheet === 'News') {
@@ -940,7 +954,7 @@ window.submitUniversalEdit = async (e) => {
     let base64NewImages = [];
     if (window.imageManagers && window.imageManagers.univ && window.imageManagers.univ.newFiles.length > 0) {
         for (let i = 0; i < window.imageManagers.univ.newFiles.length; i++) { 
-            if(typeof window.compressImage === 'function') base64NewImages.push(await window.compressImage(window.imageManagers.univ.newFiles[i])); 
+            if(typeof window.fileToBase64 === 'function') base64NewImages.push(await window.fileToBase64(window.imageManagers.univ.newFiles[i])); 
         }
     }
 
@@ -980,7 +994,7 @@ window.handleAddProduct = async (e) => {
         let base64Images = [];
         if (window.imageManagers && window.imageManagers.add && window.imageManagers.add.newFiles.length > 0) { 
             for (let i = 0; i < window.imageManagers.add.newFiles.length; i++) { 
-                if(typeof window.compressImage === 'function') base64Images.push(await window.compressImage(window.imageManagers.add.newFiles[i])); 
+                if(typeof window.fileToBase64 === 'function') base64Images.push(await window.fileToBase64(window.imageManagers.add.newFiles[i])); 
             } 
         }
 
@@ -1071,7 +1085,7 @@ window.submitEditProduct = async (e) => {
         let base64NewImages = [];
         if (window.imageManagers && window.imageManagers.edit && window.imageManagers.edit.newFiles.length > 0) { 
             for (let i = 0; i < window.imageManagers.edit.newFiles.length; i++) { 
-                if (typeof window.compressImage === 'function') base64NewImages.push(await window.compressImage(window.imageManagers.edit.newFiles[i])); 
+                if (typeof window.fileToBase64 === 'function') base64NewImages.push(await window.fileToBase64(window.imageManagers.edit.newFiles[i])); 
             } 
         }
 
