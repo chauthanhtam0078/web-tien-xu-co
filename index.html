@@ -100,7 +100,7 @@
                     <div class="flex w-full sm:w-auto justify-center sm:justify-end items-center gap-3">
                         <div class="bg-[#eeb135] text-black py-2 px-6 rounded-full text-sm flex items-center gap-2 whitespace-nowrap shadow-sm">
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 font-bold" viewBox="0 0 20 20" fill="currentColor"><path d="M2 3a1 1 0 011-1h2.153a1 1 0 01.986.836l.74 4.435a1 1 0 01-.54 1.06l-1.548.773a11.037 11.037 0 006.105 6.105l.774-1.548a1 1 0 011.059-.54l4.435.74a1 1 0 01.836.986V17a1 1 0 01-1 1h-2C7.82 18 2 12.18 2 5V3z" /></svg>
-                            Hotline <strong class="text-base tracking-wide">0916 694 438</strong>
+                            Hotline <strong id="headerHotline" class="text-base tracking-wide">0916 694 438</strong>
                         </div>
 
                         <button type="button" onclick="window.toggleCartModal()" class="relative w-10 h-10 rounded-full border border-brand-border bg-white text-brand-dark hover:bg-brand-gold hover:text-white transition-colors flex items-center justify-center shadow-sm" title="Giỏ hàng của bạn">
@@ -246,8 +246,8 @@
                 <div>
                     <h3 class="text-xl font-bold text-[#8c5a2b] mb-6">Gửi tin nhắn</h3>
                     <form class="space-y-4" onsubmit="event.preventDefault(); window.showToast('Tin nhắn của bạn đã được gửi. Chúng tôi sẽ phản hồi sớm nhất!', 'success'); this.reset();">
-                        <div><input type="text" placeholder="Họ và tên của bạn" required class="w-full px-4 py-2 border border-gray-300 focus:outline-none focus:border-[#d5a044] rounded-sm"></div>
-                        <div><input type="text" placeholder="Số điện thoại" required class="w-full px-4 py-2 border border-gray-300 focus:outline-none focus:border-[#d5a044] rounded-sm"></div>
+                        <div><input type="text" placeholder="Họ và tên của bạn" required class="w-full px-4 py-2 border border-gray-300 focus:outline-none focus:border-[#d5a044] rounded-sm" onkeydown="if(event.key==='Enter'){event.preventDefault();}"></div>
+                        <div><input type="text" placeholder="Số điện thoại" required class="w-full px-4 py-2 border border-gray-300 focus:outline-none focus:border-[#d5a044] rounded-sm" onkeydown="if(event.key==='Enter'){event.preventDefault();}"></div>
                         <div><textarea rows="4" placeholder="Nội dung cần tư vấn..." required class="w-full px-4 py-2 border border-gray-300 focus:outline-none focus:border-[#d5a044] resize-none rounded-sm"></textarea></div>
                         <button type="submit" class="w-full bg-[#1c1612] text-brand-gold font-bold py-3 hover:bg-[#d5a044] hover:text-white transition-colors uppercase text-sm rounded-full shadow-md">
                             Gửi Liên Hệ
@@ -271,6 +271,8 @@
                             <span id="profileAvatar">U</span>
                         </div>
                         <h3 id="profileName" class="text-xl font-bold text-brand-dark mb-1">Tên Khách Hàng</h3>
+                        <!-- Hiển thị Cấp Độ Cạnh Tên -->
+                        <span id="profileLevelBadge" class="inline-block bg-blue-100 text-blue-800 text-[10px] font-bold px-2 py-0.5 rounded uppercase tracking-wider mb-2 border border-blue-200 hidden"></span>
                         <p id="profilePhone" class="text-gray-600 font-sans font-medium mb-4">SĐT</p>
                         
                         <div class="text-left text-sm text-gray-700 bg-white p-4 rounded border border-gray-200 relative group mt-4">
@@ -350,19 +352,19 @@
                     <div class="lg:col-span-1 bg-brand-bg p-6 rounded border border-brand-border h-fit">
                         <h3 class="font-bold text-brand-dark mb-4 uppercase tracking-wider text-sm">Thêm Sản Phẩm Mới</h3>
                         <form id="adminAddForm" onsubmit="window.handleAddProduct(event)" class="space-y-4">
-                            <div><label class="block text-xs font-bold text-gray-600 mb-1">Tên Xu *</label><input type="text" id="addName" required placeholder="VD: Đồng Xu Cảnh Thịnh" class="w-full px-3 py-2 border border-brand-border focus:ring-1 focus:ring-brand-gold outline-none rounded-sm"></div>
+                            <div><label class="block text-xs font-bold text-gray-600 mb-1">Tên Xu *</label><input type="text" id="addName" required placeholder="VD: Đồng Xu Cảnh Thịnh" class="w-full px-3 py-2 border border-brand-border focus:ring-1 focus:ring-brand-gold outline-none rounded-sm" onkeydown="if(event.key==='Enter')event.preventDefault();"></div>
                             <div class="grid grid-cols-2 gap-4">
-                                <div><label class="block text-xs font-bold text-gray-600 mb-1">Giá *</label><input type="text" id="addPrice" required placeholder="VD: 500.000đ" class="w-full px-3 py-2 border border-brand-border focus:ring-1 focus:ring-brand-gold outline-none rounded-sm"></div>
-                                <div><label class="block text-xs font-bold text-gray-600 mb-1">Số Lượng *</label><input type="number" id="addQty" required placeholder="VD: 100" class="w-full px-3 py-2 border border-brand-border focus:ring-1 focus:ring-brand-gold outline-none rounded-sm"></div>
+                                <div><label class="block text-xs font-bold text-gray-600 mb-1">Giá *</label><input type="text" id="addPrice" required placeholder="VD: 500.000đ" class="w-full px-3 py-2 border border-brand-border focus:ring-1 focus:ring-brand-gold outline-none rounded-sm" onkeydown="if(event.key==='Enter')event.preventDefault();"></div>
+                                <div><label class="block text-xs font-bold text-gray-600 mb-1">Số Lượng *</label><input type="number" id="addQty" required placeholder="VD: 100" class="w-full px-3 py-2 border border-brand-border focus:ring-1 focus:ring-brand-gold outline-none rounded-sm" onkeydown="if(event.key==='Enter')event.preventDefault();"></div>
                             </div>
                             <div class="grid grid-cols-3 gap-4">
-                                <div class="col-span-1"><label class="block text-xs font-bold text-gray-600 mb-1">Năm đúc *</label><input type="text" id="addYears" required placeholder="1792" class="w-full px-3 py-2 border border-brand-border focus:ring-1 focus:ring-brand-gold outline-none rounded-sm"></div>
-                                <div class="col-span-2"><label class="block text-xs font-bold text-gray-600 mb-1">Triều đại *</label><input type="text" id="addPeriod" required placeholder="Triều Tây Sơn" class="w-full px-3 py-2 border border-brand-border focus:ring-1 focus:ring-brand-gold outline-none rounded-sm"></div>
+                                <div class="col-span-1"><label class="block text-xs font-bold text-gray-600 mb-1">Năm đúc *</label><input type="text" id="addYears" required placeholder="1792" class="w-full px-3 py-2 border border-brand-border focus:ring-1 focus:ring-brand-gold outline-none rounded-sm" onkeydown="if(event.key==='Enter')event.preventDefault();"></div>
+                                <div class="col-span-2"><label class="block text-xs font-bold text-gray-600 mb-1">Triều đại *</label><input type="text" id="addPeriod" required placeholder="Triều Tây Sơn" class="w-full px-3 py-2 border border-brand-border focus:ring-1 focus:ring-brand-gold outline-none rounded-sm" onkeydown="if(event.key==='Enter')event.preventDefault();"></div>
                             </div>
                             <div><label class="block text-xs font-bold text-gray-600 mb-1">Hình ảnh (Có thể chọn nhiều)</label><input type="file" id="addImages" accept="image/*" multiple class="w-full px-3 py-2 border border-brand-border bg-white focus:ring-1 focus:ring-brand-gold outline-none text-xs rounded-sm"></div>
                             <div class="grid grid-cols-4 gap-4">
-                                <div class="col-span-1"><label class="block text-xs font-bold text-gray-600 mb-1">Ký tự</label><input type="text" id="addSymbol" placeholder="寶" maxlength="1" class="w-full px-3 py-2 border border-brand-border focus:ring-1 focus:ring-brand-gold outline-none rounded-sm text-center"></div>
-                                <div class="col-span-3"><label class="block text-xs font-bold text-gray-600 mb-1">Chiết khấu (%)</label><input type="number" id="addDiscount" placeholder="VD: 15" class="w-full px-3 py-2 border border-brand-border focus:ring-1 focus:ring-brand-gold outline-none rounded-sm"></div>
+                                <div class="col-span-1"><label class="block text-xs font-bold text-gray-600 mb-1">Ký tự</label><input type="text" id="addSymbol" placeholder="寶" maxlength="1" class="w-full px-3 py-2 border border-brand-border focus:ring-1 focus:ring-brand-gold outline-none rounded-sm text-center" onkeydown="if(event.key==='Enter')event.preventDefault();"></div>
+                                <div class="col-span-3"><label class="block text-xs font-bold text-gray-600 mb-1">Chiết khấu (%)</label><input type="number" id="addDiscount" placeholder="VD: 15" class="w-full px-3 py-2 border border-brand-border focus:ring-1 focus:ring-brand-gold outline-none rounded-sm" onkeydown="if(event.key==='Enter')event.preventDefault();"></div>
                             </div>
                             <div><label class="block text-xs font-bold text-gray-600 mb-1">Mô tả chi tiết *</label><textarea id="addDesc" required rows="3" class="w-full px-3 py-2 border border-brand-border focus:ring-1 focus:ring-brand-gold outline-none resize-none rounded-sm"></textarea></div>
                             <button type="submit" class="w-full bg-brand-btn text-brand-gold font-bold py-3 hover:bg-black transition-colors shadow mt-2 rounded-full uppercase text-xs tracking-wider flex items-center justify-center gap-2">
@@ -389,9 +391,9 @@
                 <div>
                     <h4 class="text-white font-bold text-base mb-4 uppercase border-b border-gray-500 pb-2 inline-block w-full">Thông tin liên hệ</h4>
                     <ul class="space-y-3 mt-4 text-[13px] leading-relaxed">
-                        <li><strong>Địa chỉ:</strong> Rạch Giá - An Giang</li>
-                        <li><strong>Hotline:</strong> <span class="text-white font-bold">0916 694 438</span> (Zalo)</li>
-                        <li><strong>Email:</strong> <a href="mailto:thanhln2@techcombank.com.vn" class="hover:text-brand-gold transition-colors">thanhln2@techcombank.com.vn</a></li>
+                        <li><strong>Địa chỉ:</strong> <span id="footerAddress">Rạch Giá - An Giang</span></li>
+                        <li><strong>Hotline:</strong> <span id="footerPhone" class="text-white font-bold">0916 694 438</span></li>
+                        <li><strong>Email:</strong> <a id="footerEmail" href="mailto:thanhln2@techcombank.com.vn" class="hover:text-brand-gold transition-colors">thanhln2@techcombank.com.vn</a></li>
                         <li><strong>Facebook:</strong> <a href="https://facebook.com/thanhle123" target="_blank" class="fb-dynamic-link hover:text-brand-gold transition-colors fb-dynamic-text">facebook.com/thanhle123</a></li>
                     </ul>
                 </div>
@@ -439,15 +441,15 @@
                     </div>
                     
                     <div class="mt-4 grid grid-cols-3 gap-2">
-                        <a href="tel:0916694438" class="flex flex-col items-center justify-center gap-1 bg-[#28a745] hover:bg-[#218838] text-white py-2 rounded transition-colors text-[11px] font-bold shadow-sm" title="Gọi điện thoại">
+                        <a id="footerBtnCall" href="tel:0916694438" class="flex flex-col items-center justify-center gap-1 bg-[#28a745] hover:bg-[#218838] text-white py-2 rounded transition-colors text-[11px] font-bold shadow-sm" title="Gọi điện thoại">
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor"><path d="M2 3a1 1 0 011-1h2.153a1 1 0 01.986.836l.74 4.435a1 1 0 01-.54 1.06l-1.548.773a11.037 11.037 0 006.105 6.105l.774-1.548a1 1 0 011.059-.54l4.435.74a1 1 0 01.836.986V17a1 1 0 01-1 1h-2C7.82 18 2 12.18 2 5V3z" /></svg>
                             Gọi ngay
                         </a>
-                        <a href="https://zalo.me/0916694438" target="_blank" class="flex flex-col items-center justify-center gap-1 bg-[#0068ff] hover:bg-[#0051c7] text-white py-2 rounded transition-colors text-[11px] font-bold shadow-sm" title="Chat Zalo">
+                        <a id="footerBtnZalo" href="https://zalo.me/0916694438" target="_blank" class="flex flex-col items-center justify-center gap-1 bg-[#0068ff] hover:bg-[#0051c7] text-white py-2 rounded transition-colors text-[11px] font-bold shadow-sm" title="Chat Zalo">
                             <span class="text-base leading-none font-black tracking-tighter">Zalo</span>
                             Chat Zalo
                         </a>
-                        <a href="https://m.me/thanhle123" target="_blank" class="flex flex-col items-center justify-center gap-1 bg-[#0084ff] hover:bg-[#006bd1] text-white py-2 rounded transition-colors text-[11px] font-bold shadow-sm" title="Chat Messenger">
+                        <a id="footerBtnMessenger" href="https://m.me/thanhle123" target="_blank" class="flex flex-col items-center justify-center gap-1 bg-[#0084ff] hover:bg-[#006bd1] text-white py-2 rounded transition-colors text-[11px] font-bold shadow-sm" title="Chat Messenger">
                             <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C6.477 2 2 6.145 2 11.258c0 2.902 1.446 5.44 3.665 7.123v3.313l3.35-1.841c.95.27 1.954.417 2.985.417 5.523 0 10-4.145 10-9.258S17.523 2 12 2zm1.09 12.392l-2.82-3.003-5.503 3.003 6.046-6.425 2.88 3.004 5.443-3.004-6.046 6.425z"/></svg>
                             Messenger
                         </a>
@@ -481,7 +483,7 @@
                 <form id="loginForm" onsubmit="window.submitLogin(event)" class="space-y-4">
                     <div>
                         <label class="block text-xs font-bold text-gray-600 mb-1">Tên Đăng Nhập</label>
-                        <input type="text" id="loginUsername" required class="w-full px-4 py-2 text-sm border border-gray-300 focus:border-brand-gold outline-none rounded bg-gray-50 focus:bg-white transition-colors">
+                        <input type="text" id="loginUsername" required class="w-full px-4 py-2 text-sm border border-gray-300 focus:border-brand-gold outline-none rounded bg-gray-50 focus:bg-white transition-colors" onkeydown="if(event.key==='Enter')event.preventDefault();">
                     </div>
                     <div>
                         <label class="block text-xs font-bold text-gray-600 mb-1">Mật Khẩu</label>
@@ -519,7 +521,7 @@
                 <form id="customerLoginForm" onsubmit="window.submitCustomerLogin(event)" class="space-y-4">
                     <div>
                         <label class="block text-xs font-bold text-gray-600 mb-1">Số điện thoại</label>
-                        <input type="tel" id="cusLoginPhone" required class="w-full px-4 py-2 text-sm border border-gray-300 focus:border-brand-gold outline-none rounded bg-gray-50 focus:bg-white transition-colors">
+                        <input type="tel" id="cusLoginPhone" required class="w-full px-4 py-2 text-sm border border-gray-300 focus:border-brand-gold outline-none rounded bg-gray-50 focus:bg-white transition-colors" onkeydown="if(event.key==='Enter')event.preventDefault();">
                     </div>
                     <div>
                         <label class="block text-xs font-bold text-gray-600 mb-1">Mật Khẩu</label>
@@ -535,15 +537,15 @@
                 <form id="customerRegisterForm" onsubmit="window.submitCustomerRegister(event)" class="space-y-4 hidden">
                     <div>
                         <label class="block text-xs font-bold text-gray-600 mb-1">Họ và Tên *</label>
-                        <input type="text" id="cusRegName" required class="w-full px-4 py-2 text-sm border border-gray-300 focus:border-brand-gold outline-none rounded bg-gray-50 focus:bg-white transition-colors">
+                        <input type="text" id="cusRegName" required class="w-full px-4 py-2 text-sm border border-gray-300 focus:border-brand-gold outline-none rounded bg-gray-50 focus:bg-white transition-colors" onkeydown="if(event.key==='Enter')event.preventDefault();">
                     </div>
                     <div>
                         <label class="block text-xs font-bold text-gray-600 mb-1">Số điện thoại *</label>
-                        <input type="tel" id="cusRegPhone" required class="w-full px-4 py-2 text-sm border border-gray-300 focus:border-brand-gold outline-none rounded bg-gray-50 focus:bg-white transition-colors">
+                        <input type="tel" id="cusRegPhone" required class="w-full px-4 py-2 text-sm border border-gray-300 focus:border-brand-gold outline-none rounded bg-gray-50 focus:bg-white transition-colors" onkeydown="if(event.key==='Enter')event.preventDefault();">
                     </div>
                     <div>
                         <label class="block text-xs font-bold text-gray-600 mb-1">Email</label>
-                        <input type="email" id="cusRegEmail" class="w-full px-4 py-2 text-sm border border-gray-300 focus:border-brand-gold outline-none rounded bg-gray-50 focus:bg-white transition-colors">
+                        <input type="email" id="cusRegEmail" class="w-full px-4 py-2 text-sm border border-gray-300 focus:border-brand-gold outline-none rounded bg-gray-50 focus:bg-white transition-colors" onkeydown="if(event.key==='Enter')event.preventDefault();">
                     </div>
                     <div>
                         <label class="block text-xs font-bold text-gray-600 mb-1">Mật Khẩu *</label>
@@ -604,22 +606,22 @@
             <div class="p-6">
                 <form id="adminEditForm" onsubmit="window.submitEditProduct(event)" class="space-y-4">
                     <input type="hidden" id="editProductId">
-                    <div><label class="block text-xs font-bold text-gray-600 mb-1">Tên Xu *</label><input type="text" id="editName" required class="w-full px-3 py-2 border border-brand-border focus:ring-1 focus:ring-brand-gold outline-none rounded-sm"></div>
+                    <div><label class="block text-xs font-bold text-gray-600 mb-1">Tên Xu *</label><input type="text" id="editName" required class="w-full px-3 py-2 border border-brand-border focus:ring-1 focus:ring-brand-gold outline-none rounded-sm" onkeydown="if(event.key==='Enter')event.preventDefault();"></div>
                     <div class="grid grid-cols-2 gap-4">
-                        <div><label class="block text-xs font-bold text-gray-600 mb-1">Giá *</label><input type="text" id="editPrice" required class="w-full px-3 py-2 border border-brand-border focus:ring-1 focus:ring-brand-gold outline-none rounded-sm"></div>
-                        <div><label class="block text-xs font-bold text-gray-600 mb-1">Số Lượng *</label><input type="number" id="editQty" required class="w-full px-3 py-2 border border-brand-border focus:ring-1 focus:ring-brand-gold outline-none rounded-sm"></div>
+                        <div><label class="block text-xs font-bold text-gray-600 mb-1">Giá *</label><input type="text" id="editPrice" required class="w-full px-3 py-2 border border-brand-border focus:ring-1 focus:ring-brand-gold outline-none rounded-sm" onkeydown="if(event.key==='Enter')event.preventDefault();"></div>
+                        <div><label class="block text-xs font-bold text-gray-600 mb-1">Số Lượng *</label><input type="number" id="editQty" required class="w-full px-3 py-2 border border-brand-border focus:ring-1 focus:ring-brand-gold outline-none rounded-sm" onkeydown="if(event.key==='Enter')event.preventDefault();"></div>
                     </div>
                     <div class="grid grid-cols-3 gap-4">
-                        <div class="col-span-1"><label class="block text-xs font-bold text-gray-600 mb-1">Năm đúc *</label><input type="text" id="editYears" required class="w-full px-3 py-2 border border-brand-border focus:ring-1 focus:ring-brand-gold outline-none rounded-sm"></div>
-                        <div class="col-span-2"><label class="block text-xs font-bold text-gray-600 mb-1">Triều đại *</label><input type="text" id="editPeriod" required class="w-full px-3 py-2 border border-brand-border focus:ring-1 focus:ring-brand-gold outline-none rounded-sm"></div>
+                        <div class="col-span-1"><label class="block text-xs font-bold text-gray-600 mb-1">Năm đúc *</label><input type="text" id="editYears" required class="w-full px-3 py-2 border border-brand-border focus:ring-1 focus:ring-brand-gold outline-none rounded-sm" onkeydown="if(event.key==='Enter')event.preventDefault();"></div>
+                        <div class="col-span-2"><label class="block text-xs font-bold text-gray-600 mb-1">Triều đại *</label><input type="text" id="editPeriod" required class="w-full px-3 py-2 border border-brand-border focus:ring-1 focus:ring-brand-gold outline-none rounded-sm" onkeydown="if(event.key==='Enter')event.preventDefault();"></div>
                     </div>
                     <div>
                         <label class="block text-xs font-bold text-gray-600 mb-1">Hình ảnh (Để trống nếu giữ nguyên ảnh cũ)</label>
                         <input type="file" id="editImages" accept="image/*" multiple class="w-full px-3 py-2 border border-brand-border bg-white focus:ring-1 focus:ring-brand-gold outline-none text-xs rounded-sm">
                     </div>
                     <div class="grid grid-cols-4 gap-4">
-                        <div class="col-span-1"><label class="block text-xs font-bold text-gray-600 mb-1">Ký tự ảo</label><input type="text" id="editSymbol" maxlength="1" class="w-full px-3 py-2 border border-brand-border focus:ring-1 focus:ring-brand-gold outline-none rounded-sm text-center"></div>
-                        <div class="col-span-3"><label class="block text-xs font-bold text-gray-600 mb-1">Chiết khấu (%)</label><input type="number" id="editDiscount" class="w-full px-3 py-2 border border-brand-border focus:ring-1 focus:ring-brand-gold outline-none rounded-sm"></div>
+                        <div class="col-span-1"><label class="block text-xs font-bold text-gray-600 mb-1">Ký tự ảo</label><input type="text" id="editSymbol" maxlength="1" class="w-full px-3 py-2 border border-brand-border focus:ring-1 focus:ring-brand-gold outline-none rounded-sm text-center" onkeydown="if(event.key==='Enter')event.preventDefault();"></div>
+                        <div class="col-span-3"><label class="block text-xs font-bold text-gray-600 mb-1">Chiết khấu (%)</label><input type="number" id="editDiscount" class="w-full px-3 py-2 border border-brand-border focus:ring-1 focus:ring-brand-gold outline-none rounded-sm" onkeydown="if(event.key==='Enter')event.preventDefault();"></div>
                     </div>
                     <div><label class="block text-xs font-bold text-gray-600 mb-1">Mô tả chi tiết *</label><textarea id="editDesc" required rows="4" class="w-full px-3 py-2 border border-brand-border focus:ring-1 focus:ring-brand-gold outline-none resize-none rounded-sm"></textarea></div>
                     <button type="submit" class="w-full bg-brand-gold text-white font-bold py-3 hover:bg-[#b89052] transition-colors shadow mt-4 rounded-full uppercase text-xs tracking-wider flex items-center justify-center gap-2">
@@ -695,7 +697,7 @@
                     <!-- VOUCHER INPUT FIELD -->
                     <div class="border-t border-brand-border pt-4 pb-2 flex-shrink-0">
                         <div class="flex gap-2">
-                            <input type="text" id="voucherCodeInput" placeholder="Nhập mã giảm giá..." class="flex-grow px-3 py-2 text-sm border border-brand-border focus:ring-1 focus:ring-brand-gold outline-none rounded-sm uppercase font-bold text-brand-dark">
+                            <input type="text" id="voucherCodeInput" placeholder="Nhập mã giảm giá..." class="flex-grow px-3 py-2 text-sm border border-brand-border focus:ring-1 focus:ring-brand-gold outline-none rounded-sm uppercase font-bold text-brand-dark" onkeydown="if(event.key==='Enter'){event.preventDefault(); window.applyVoucher();}">
                             <button type="button" onclick="window.applyVoucher()" class="bg-brand-dark text-brand-gold px-4 py-2 rounded-sm text-xs font-bold hover:bg-[#d5a044] hover:text-white transition whitespace-nowrap shadow-sm">ÁP DỤNG</button>
                         </div>
                         <p id="voucherMessage" class="text-[11px] mt-1.5 hidden font-medium"></p>
@@ -713,13 +715,13 @@
                 <div class="lg:w-7/12 p-6 md:p-8 bg-brand-bg overflow-y-auto custom-scrollbar">
                     <form id="orderForm" onsubmit="window.submitOrder(event)" class="space-y-4">
                         <input type="hidden" id="hiddenProductName" name="product_name">
-                        <div><input type="text" name="customer_name" required placeholder="Họ và Tên *" class="w-full px-4 py-2 text-sm border border-brand-border focus:ring-1 focus:ring-brand-gold outline-none rounded-sm"></div>
+                        <div><input type="text" name="customer_name" required placeholder="Họ và Tên *" class="w-full px-4 py-2 text-sm border border-brand-border focus:ring-1 focus:ring-brand-gold outline-none rounded-sm" onkeydown="if(event.key==='Enter')event.preventDefault();"></div>
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div><input type="tel" name="phone" required placeholder="Số điện thoại *" class="w-full px-4 py-2 text-sm border border-brand-border focus:ring-1 focus:ring-brand-gold outline-none rounded-sm"></div>
-                            <div id="checkoutEmailContainer"><input type="email" name="email" placeholder="Email (Tuỳ chọn)" class="w-full px-4 py-2 text-sm border border-brand-border focus:ring-1 focus:ring-brand-gold outline-none rounded-sm"></div>
+                            <div><input type="tel" name="phone" required placeholder="Số điện thoại *" class="w-full px-4 py-2 text-sm border border-brand-border focus:ring-1 focus:ring-brand-gold outline-none rounded-sm" onkeydown="if(event.key==='Enter')event.preventDefault();"></div>
+                            <div id="checkoutEmailContainer"><input type="email" name="email" placeholder="Email (Tuỳ chọn)" class="w-full px-4 py-2 text-sm border border-brand-border focus:ring-1 focus:ring-brand-gold outline-none rounded-sm" onkeydown="if(event.key==='Enter')event.preventDefault();"></div>
                         </div>
                         <div id="checkoutAddressContainer">
-                            <textarea name="address" required rows="2" placeholder="Địa chỉ giao hàng chi tiết *" class="w-full px-4 py-2 text-sm border border-brand-border focus:ring-1 focus:ring-brand-gold resize-none outline-none rounded-sm"></textarea>
+                            <textarea name="address" required rows="2" placeholder="Địa chỉ giao hàng chi tiết *" class="w-full px-4 py-2 text-sm border border-brand-border focus:ring-1 focus:ring-brand-gold resize-none outline-none rounded-sm" onkeydown="if(event.key==='Enter')event.preventDefault();"></textarea>
                         </div>
                         <div><textarea name="notes" rows="2" placeholder="Ghi chú đơn hàng (Tuỳ chọn)" class="w-full px-4 py-2 text-sm border border-brand-border focus:ring-1 focus:ring-brand-gold resize-none outline-none rounded-sm"></textarea></div>
 
@@ -772,7 +774,8 @@
 
             <div class="md:w-1/2 bg-brand-card relative flex items-center justify-center h-64 md:h-auto overflow-hidden group">
                 <div class="absolute inset-0 opacity-10 bg-[linear-gradient(#cda568_1px,transparent_1px),linear-gradient(90deg,#cda568_1px,transparent_1px)] bg-[size:20px_20px]"></div>
-                <img id="detailMainImage" src="" class="w-full h-full object-contain relative z-10 hidden drop-shadow-xl p-4">
+                <!-- CẬP NHẬT: Cho phép ảnh full view -->
+                <img id="detailMainImage" src="" class="w-full h-full object-contain relative z-10 hidden drop-shadow-xl p-4 cursor-pointer" onclick="window.viewFullImage(this.src)" title="Bấm để xem ảnh gốc">
                 <div id="detailSvgFallback" class="w-full h-full flex items-center justify-center relative z-10 hidden"></div>
                 
                 <button id="detailPrevBtn" onclick="window.detailPrevImage()" class="absolute left-2 top-1/2 -translate-y-1/2 z-20 bg-black/40 hover:bg-brand-gold text-white p-2 rounded-full hidden transition">
@@ -821,9 +824,12 @@
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
             </button>
 
-            <div class="w-full h-48 md:h-64 bg-brand-card relative overflow-hidden flex-shrink-0">
-                <div class="absolute inset-0 opacity-10 bg-[linear-gradient(#cda568_1px,transparent_1px),linear-gradient(90deg,#cda568_1px,transparent_1px)] bg-[size:20px_20px]"></div>
-                <img id="newsDetailImage" src="" class="w-full h-full object-cover relative z-10 hidden drop-shadow-md">
+            <!-- CẬP NHẬT: Thêm nút Prev/Next và Counter cho Ảnh Tin Tức -->
+            <div class="w-full h-48 md:h-64 bg-brand-card relative overflow-hidden flex-shrink-0 group">
+                <div class="absolute inset-0 opacity-10 bg-[linear-gradient(#cda568_1px,transparent_1px),linear-gradient(90deg(#cda568_1px,transparent_1px)] bg-[size:20px_20px]"></div>
+                <!-- CẬP NHẬT: Bỏ object-cover, thay bằng object-contain và cho phép xem full -->
+                <img id="newsDetailImage" src="" class="w-full h-full object-contain relative z-10 hidden drop-shadow-md cursor-pointer p-2" onclick="window.viewFullImage(this.src)" title="Bấm để xem ảnh gốc">
+                
                 <div id="newsDetailSvgFallback" class="w-full h-full flex items-center justify-center relative z-10 hidden">
                     <svg viewBox="0 0 120 120" class="w-24 h-24 drop-shadow-lg">
                         <polygon points="60,5 98,20 115,58 98,95 60,115 22,95 5,58 22,20" fill="none" stroke="#cda568" stroke-width="2" opacity="0.5"/>
@@ -837,6 +843,14 @@
                         <text x="84" y="64" font-size="12" font-family="serif" font-weight="bold" text-anchor="middle" fill="#cda568">史</text>
                     </svg>
                 </div>
+
+                <button id="newsPrevBtn" onclick="window.newsPrevImage()" class="absolute left-2 top-1/2 -translate-y-1/2 z-20 bg-black/40 hover:bg-brand-gold text-white p-2 rounded-full hidden transition">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clip-rule="evenodd" /></svg>
+                </button>
+                <button id="newsNextBtn" onclick="window.newsNextImage()" class="absolute right-2 top-1/2 -translate-y-1/2 z-20 bg-black/40 hover:bg-brand-gold text-white p-2 rounded-full hidden transition">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd" /></svg>
+                </button>
+                <div id="newsImageCounter" class="absolute bottom-3 right-3 z-20 bg-black/50 text-white text-[10px] px-2 py-1 rounded-full hidden tracking-widest font-mono">1/1</div>
             </div>
 
             <div class="flex flex-col p-6 md:p-8 bg-brand-bg overflow-y-auto custom-scrollbar">
@@ -848,6 +862,14 @@
                 <div class="text-gray-700 text-sm leading-relaxed whitespace-pre-wrap" id="newsDetailDesc">Nội dung bài viết...</div>
             </div>
         </div>
+    </div>
+
+    <!-- TÍCH HỢP: Modal Xem ảnh gốc Full HD -->
+    <div id="imageViewerModal" class="fixed inset-0 bg-black/90 z-[110] hidden items-center justify-center p-4 cursor-zoom-out backdrop-blur-sm transition-opacity duration-300" onclick="this.classList.replace('flex', 'hidden')">
+        <button class="absolute top-4 right-4 text-white hover:text-red-500 z-20 bg-black/50 rounded-full p-2 transition-colors">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+        </button>
+        <img id="imageViewerImg" src="" class="max-w-full max-h-full object-contain cursor-default drop-shadow-2xl rounded" onclick="event.stopPropagation()">
     </div>
 
     <script src="./js/config.js"></script>
