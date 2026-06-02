@@ -73,7 +73,7 @@ window.toggleAdmin = async (forceOpen = false) => {
     window.isAdminActive = !window.isAdminActive;
     if(window.isAdminActive || forceOpen) {
         window.isAdminActive = true;
-        document.getElementById('adminWelcomeName').innerHTML = `Quản lý bán hàng: <strong class="text-red-700 font-extrabold uppercase drop-shadow-sm ml-1">${window.loggedInUser.username}</strong>`;
+        document.getElementById('adminWelcomeName').innerHTML = `Quản lý hệ thống: <strong class="text-red-700 font-extrabold uppercase drop-shadow-sm ml-1">${window.loggedInUser.username}</strong>`;
         
         // Load nhanh Giao diện bằng Cache để tăng tốc
         document.getElementById('publicContainer').classList.add('hidden'); 
