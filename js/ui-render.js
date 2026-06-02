@@ -1,0 +1,583 @@
+// ============================================================================
+// 📁 MODULE 4.1: UI RENDER (ui-render.js)
+// Hàm tiện ích dùng chung + Render nội dung ra DOM:
+// Sản phẩm, Tin tức, Giới thiệu, Liên hệ, Footer, Profile
+// ============================================================================
+
+window.currentProductPage = 1;
+const PRODUCTS_PER_PAGE = 12;
+
+// --- [HÀM XEM ẢNH GỐC] Kích hoạt Lightbox khi nhấp vào hình ảnh ---
+window.viewFullImage = (src) => {
+    if (!src) return;
+    let fullSrc = src;
+    // Tự động chuyển link từ Thumbnail (sz=w1000) sang Ảnh gốc độ phân giải cao nhất (sz=s0)
+    if (fullSrc.includes('thumbnail?id=')) {
+        fullSrc = fullSrc.replace(/&sz=w\d+/, '&sz=s0'); 
+    }
+    const viewerModal = document.getElementById('imageViewerModal');
+    const viewerImg = document.getElementById('imageViewerImg');
+    if (viewerModal && viewerImg) {
+        viewerImg.src = fullSrc;
+        viewerModal.classList.remove('hidden');
+        viewerModal.classList.add('flex');
+    }
+};
+
+window.formatTitleCase = (str) => {
+    if(!str) return "";
+    let formatted = str.trim().replace(/\s+/g, ' ').replace(/\s*,\s*/g, ', ').replace(/\s*-\s*/g, '-').replace(/\s*\/\s*/g, '/');
+    return formatted.toLowerCase().replace(/(?:^|[\s,\-\/\.])\S/g, match => match.toUpperCase());
+};
+
+window.validateInput = (phone, email) => {
+    if (phone && !/^0\d{9}$/.test(phone)) return "Số điện thoại phải bao gồm đúng 10 chữ số và bắt đầu bằng số 0!";
+    if (email && !email.includes('@')) return "Email không hợp lệ (phải chứa ký tự @)!";
+    return null;
+};
+
+window.currentNewsImages = [];
+window.currentNewsIndex = 0;
+
+window.openNewsDetail = (id) => {
+    let news = (window.globalAllNews || []).find(n => n.id == id);
+    if (!news) return;
+
+    document.getElementById('newsDetailCategory').innerText = news.category;
+    document.getElementById('newsDetailTitle').innerText = news.title;
+    document.getElementById('newsDetailDate').innerText = formatDateString(news.date);
+    
+    let formattedDesc = news.desc || '';
+    if (!formattedDesc.includes('<') && formattedDesc.includes('\n')) formattedDesc = formattedDesc.replace(/\n/g, '<br>');
+    const descEl = document.getElementById('newsDetailDesc');
+    descEl.innerHTML = formattedDesc;
+    descEl.classList.add('rich-text-display');
+
+    window.currentNewsImages = news.images && news.images.length > 0 ? news.images : [];
+    if (window.currentNewsImages.length === 0 && news.image) window.currentNewsImages = [news.image];
+    window.currentNewsIndex = 0;
+    
+    window.updateNewsImageDisplay();
+
+    let cleanText = typeof window.stripHTMLForSearch === 'function' ? window.stripHTMLForSearch(formattedDesc) : formattedDesc;
+    const seoImg = window.currentNewsImages.length > 0 ? window.currentNewsImages[0] : '';
+    window.updateSEOMeta(`${news.title} | Tiền Xu Cổ`, cleanText.substring(0, 150) + '...', seoImg);
+
+    document.getElementById('newsModal').classList.remove('opacity-0', 'pointer-events-none');
+    document.getElementById('newsModalContent').classList.remove('scale-95');
+    document.body.classList.add('modal-open');
+};
+
+window.updateNewsImageDisplay = () => {
+    const imgEl = document.getElementById('newsDetailImage');
+    const svgEl = document.getElementById('newsDetailSvgFallback');
+    const prevBtn = document.getElementById('newsPrevBtn');
+    const nextBtn = document.getElementById('newsNextBtn');
+    const counter = document.getElementById('newsImageCounter');
+
+    if (window.currentNewsImages.length > 0 && window.currentNewsImages[window.currentNewsIndex].trim() !== '') {
+        const safeUrls = typeof window.getSafeImgUrls === 'function' ? window.getSafeImgUrls(window.currentNewsImages[window.currentNewsIndex]) : {primary: window.currentNewsImages[window.currentNewsIndex], fallback: ''};
+        
+        imgEl.src = safeUrls.primary;
+        imgEl.dataset.retried = ""; 
+        imgEl.onerror = function() {
+            if (!this.dataset.retried && safeUrls.fallback) {
+                this.dataset.retried = 'true';
+                this.src = safeUrls.fallback;
+            } else {
+                this.classList.add('hidden');
+                if (svgEl) svgEl.classList.remove('hidden');
+            }
+        };
+        imgEl.classList.remove('hidden');
+        if (svgEl) svgEl.classList.add('hidden');
+
+        if (window.currentNewsImages.length > 1) {
+            if(prevBtn) prevBtn.classList.remove('hidden'); 
+            if(nextBtn) nextBtn.classList.remove('hidden'); 
+            if(counter) {
+                counter.classList.remove('hidden');
+                counter.innerText = `${window.currentNewsIndex + 1}/${window.currentNewsImages.length}`;
+            }
+        } else {
+            if(prevBtn) prevBtn.classList.add('hidden'); 
+            if(nextBtn) nextBtn.classList.add('hidden'); 
+            if(counter) counter.classList.add('hidden');
+        }
+    } else {
+        imgEl.classList.add('hidden'); 
+        if(prevBtn) prevBtn.classList.add('hidden'); 
+        if(nextBtn) nextBtn.classList.add('hidden'); 
+        if(counter) counter.classList.add('hidden');
+        if (svgEl) svgEl.classList.remove('hidden');
+    }
+};
+
+window.newsNextImage = () => { if (window.currentNewsImages.length <= 1) return; window.currentNewsIndex = (window.currentNewsIndex + 1) % window.currentNewsImages.length; window.updateNewsImageDisplay(); };
+window.newsPrevImage = () => { if (window.currentNewsImages.length <= 1) return; window.currentNewsIndex = (window.currentNewsIndex - 1 + window.currentNewsImages.length) % window.currentNewsImages.length; window.updateNewsImageDisplay(); };
+
+window.closeNewsModal = () => {
+    document.getElementById('newsModal').classList.add('opacity-0', 'pointer-events-none');
+    document.getElementById('newsModalContent').classList.add('scale-95');
+    document.body.classList.remove('modal-open');
+    window.updateSEOMeta('Tin Tức & Kiến Thức Sưu Tầm', '', '');
+};
+
+window.renderNewsData = function() {
+    const container = document.getElementById('newsContainer');
+    if(!container) return;
+    container.className = 'flex flex-wrap justify-center gap-8';
+    let fallbackNewsSVG = (window.SVG_FALLBACK_NEWS || `<div class="transform group-hover:scale-105 transition duration-500 ease-out flex items-center justify-center"><svg viewBox="0 0 120 120" class="w-28 h-28 drop-shadow-lg"><polygon points="60,5 98,20 115,58 98,95 60,115 22,95 5,58 22,20" fill="none" stroke="#cda568" stroke-width="2" opacity="0.5"/><polygon points="60,12 91,25 105,58 91,91 60,108 29,91 15,58 29,25" fill="none" stroke="#8c5a2b" stroke-width="1" opacity="0.6"/><circle cx="60" cy="60" r="38" fill="#1c1612" stroke="#cda568" stroke-width="3"/><circle cx="60" cy="60" r="30" fill="none" stroke="#cda568" stroke-width="1" stroke-dasharray="3 3" opacity="0.7"/><rect x="50" y="50" width="20" height="20" fill="#f8f5ee" stroke="#cda568" stroke-width="2"/><text x="60" y="44" font-size="12" font-family="serif" font-weight="bold" text-anchor="middle" fill="#cda568">越</text><text x="60" y="86" font-size="12" font-family="serif" font-weight="bold" text-anchor="middle" fill="#cda568">南</text><text x="36" y="64" font-size="12" font-family="serif" font-weight="bold" text-anchor="middle" fill="#cda568">文</text><text x="84" y="64" font-size="12" font-family="serif" font-weight="bold" text-anchor="middle" fill="#cda568">史</text></svg></div>`);
+
+    const dataToRender = window.globalNews || [];
+    container.innerHTML = dataToRender.map(n => {
+        let firstImg = n.images && n.images.length > 0 ? n.images[0] : n.image;
+        let urls = window.getSafeImgUrls(firstImg);
+        let cleanText = typeof window.stripHTMLForSearch === 'function' ? window.stripHTMLForSearch(n.desc) : n.desc;
+        
+        return `<div class="w-full md:w-[calc(33.333%_-_1.333rem)] xl:w-[calc(25%_-_1.5rem)] bg-white border border-gray-200 rounded-sm overflow-hidden hover:shadow-md transition group cursor-pointer flex flex-col" onclick="window.openNewsDetail('${n.id}')">
+            <div class="w-full aspect-video bg-[#f8f5ee] relative overflow-hidden flex items-center justify-center border-b border-brand-border">
+                ${urls.primary ? `<img src="${urls.primary}" loading="lazy" onerror="window.handleSafeImageLoadError(this, '${urls.fallback}')" class="absolute inset-0 w-full h-full object-contain p-1 group-hover:scale-105 transition duration-500 z-10"><div class="absolute inset-0 hidden items-center justify-center z-0">${fallbackNewsSVG}</div>` : fallbackNewsSVG}
+            </div>
+            <div class="p-5 flex-grow text-center"><span class="text-xs text-[#d5a044] font-bold uppercase mb-2 block">${n.category}</span><h4 class="font-bold text-lg mb-2 group-hover:text-[#8c5a2b] transition">${n.title}</h4><p class="text-gray-600 text-sm line-clamp-3">${cleanText}</p></div>
+        </div>`
+    }).join('');
+};
+
+window.renderPublicGrid = function(appendMode = false) {
+    const featuredGrid = document.getElementById('featuredProductGrid');
+    const allGrid = document.getElementById('allProductGrid');
+    if(!featuredGrid || !allGrid) return;
+    
+    if (!appendMode) {
+        featuredGrid.innerHTML = ''; allGrid.innerHTML = '';
+    }
+    
+    featuredGrid.className = 'flex flex-wrap justify-center gap-6';
+    allGrid.className = 'flex flex-wrap justify-center gap-6';
+    
+    let rawData = window.filteredProducts ? window.filteredProducts : (window.globalProducts || []);
+    let fullDataList = [...rawData];
+
+    fullDataList.sort((a, b) => {
+        const discountA = typeof window.getDiscountPercent === 'function' ? window.getDiscountPercent(a.discount) : 0;
+        const discountB = typeof window.getDiscountPercent === 'function' ? window.getDiscountPercent(b.discount) : 0;
+        return discountB - discountA; 
+    });
+    
+    if (fullDataList.length === 0) {
+        allGrid.innerHTML = `<p class="w-full text-center text-gray-500 italic py-10">Chưa có sản phẩm.</p>`; 
+        return;
+    }
+
+    const startIndex = appendMode ? (window.currentProductPage - 1) * PRODUCTS_PER_PAGE : 0;
+    const limitIndex = window.currentProductPage * PRODUCTS_PER_PAGE;
+    const dataToRender = fullDataList.slice(startIndex, limitIndex);
+    
+    dataToRender.forEach((p, relativeIndex) => {
+        const absoluteIndex = startIndex + relativeIndex;
+        let firstImage = (p.images && p.images.length > 0 && p.images[0].trim() !== '') ? p.images[0] : '';
+        let urls = window.getSafeImgUrls(firstImage);
+        
+        const finalPrice = typeof window.calculateFinalPrice === 'function' ? window.calculateFinalPrice(p.price, p.discount) : (parseInt(p.price.replace(/[^\d]/g, '')) || 0);
+        const discountVal = typeof window.getDiscountPercent === 'function' ? window.getDiscountPercent(p.discount) : 0;
+        let formatCurr = typeof window.formatCurrency === 'function' ? window.formatCurrency : (v) => v + 'đ';
+        
+        let badgeHTML = discountVal > 0 ? `<div class="absolute top-2 left-2 bg-red-600 text-white rounded-full w-10 h-10 flex items-center justify-center font-bold text-xs shadow-md z-20">-${discountVal}%</div>` : '';
+        let priceHTML = discountVal > 0 ? `<div class="text-[11px] text-gray-500 line-through mb-0.5 font-sans">${p.price}</div><div class="text-xl font-bold font-sans text-red-800 leading-none">${formatCurr(finalPrice)}</div>` : `<div class="text-xl font-bold font-sans text-red-800">${p.price}</div>`;
+        const sym = p.symbol || '古';
+        let fallbackSVG = (typeof window.buildFallbackCoin === 'function') ? window.buildFallbackCoin(sym) : `<svg viewBox="0 0 100 100" class="relative w-28 h-28 text-brand-gold opacity-80 drop-shadow-md group-hover:scale-105 transition-transform duration-500 z-0"><circle cx="50" cy="50" r="45" fill="currentColor" fill-opacity="0.2" stroke="currentColor" stroke-width="2"/><circle cx="50" cy="50" r="35" fill="transparent" stroke="currentColor" stroke-width="1"/><rect x="35" y="35" width="30" height="30" fill="transparent" stroke="currentColor" stroke-width="1"/><text x="50" y="55" font-size="16" text-anchor="middle" fill="#1c1612" font-weight="bold">${sym}</text></svg>`;
+
+        let voucherBadge = (p.vouchers && p.vouchers.trim() !== '') ? `<div class="absolute bottom-2 left-2 bg-red-50 text-red-600 border border-red-200 text-[10px] font-bold px-2 py-0.5 rounded-sm z-20 shadow-sm flex items-center gap-1">🎟️ ${p.vouchers}</div>` : '';
+
+        let imageHTML = urls.primary !== '' 
+            ? `<img src="${urls.primary}" loading="lazy" onerror="window.handleSafeImageLoadError(this, '${urls.fallback}')" alt="${p.name}" class="absolute inset-0 w-full h-full object-contain group-hover:scale-105 transition-transform duration-500 z-10"><div class="absolute inset-0 hidden items-center justify-center z-0 group-hover:scale-105 transition-transform duration-500">${fallbackSVG}</div>` 
+            : fallbackSVG;
+
+        let cleanText = typeof window.stripHTMLForSearch === 'function' ? window.stripHTMLForSearch(p.desc) : p.desc;
+
+        const cardHTML = `<div class="w-full sm:w-[calc(50%_-_0.75rem)] lg:w-[calc(25%_-_1.125rem)] 2xl:w-[calc(20%_-_1.2rem)] bg-white border border-brand-border rounded-sm shadow-sm hover:shadow-lg transition-shadow flex flex-col relative overflow-hidden group">
+            <div class="cursor-pointer flex-grow flex flex-col" onclick="window.openProductDetail('${p.id || p.ma_sp || absoluteIndex}')">
+                <div class="bg-brand-card h-48 relative flex justify-center items-center border-b border-brand-border overflow-hidden"><div class="absolute top-0 right-0 bg-brand-dark text-brand-gold text-xs px-2 py-1 font-mono z-20">${p.years}</div>${badgeHTML}${voucherBadge}${imageHTML}</div>
+                <div class="p-5 flex-grow flex flex-col items-center text-center"><h4 class="font-serif font-bold text-lg mb-2 text-brand-dark h-14 line-clamp-2">${p.name}</h4><p class="text-sm text-gray-600 mb-4 line-clamp-2">${cleanText}</p><div class="dashed-line mt-auto w-full"></div></div>
+            </div>
+            <div class="px-5 pb-5 flex flex-col items-center gap-3"><div class="text-center">${priceHTML}<div class="text-xs text-gray-500 uppercase mt-1">${p.period}</div></div><button onclick="event.stopPropagation(); window.addToCart('${p.id || p.ma_sp || absoluteIndex}')" class="w-full justify-center bg-brand-btn text-brand-gold hover:text-white px-4 py-2 text-[13px] transition-colors rounded-full shadow-sm flex items-center gap-1"><svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" /></svg> Thêm Vào Giỏ</button></div>
+        </div>`;
+        
+        allGrid.insertAdjacentHTML('beforeend', cardHTML);
+        
+        if(!appendMode && absoluteIndex < 4 && !window.filteredProducts) {
+            featuredGrid.insertAdjacentHTML('beforeend', cardHTML);
+        }
+    });
+
+    const loadMoreBtn = document.getElementById('loadMoreContainer');
+    if (loadMoreBtn) {
+        if (fullDataList.length > limitIndex) {
+            loadMoreBtn.innerHTML = `
+                <button onclick="window.loadMoreProducts()" class="border-2 border-brand-gold text-[#8c5a2b] font-bold py-2.5 px-10 hover:bg-brand-gold hover:text-white transition-colors uppercase text-sm tracking-wider rounded-full shadow-sm bg-white">
+                    Hiển thị thêm sản phẩm ➔
+                </button>`;
+        } else {
+            loadMoreBtn.innerHTML = '';
+        }
+    }
+};
+
+window.loadMoreProducts = function() {
+    window.currentProductPage++;
+    window.renderPublicGrid(true); 
+};
+
+
+window.aboutImages = [];
+window.aboutImageIndex = 0;
+
+window.renderAboutData = function() {
+    const container = document.getElementById('aboutContainer');
+    if (!container) return;
+    const info = window.globalAbout || {};
+    if (!info || Object.keys(info).length === 0) return;
+
+    window.aboutImages = info.images && info.images.length > 0 ? info.images : (info.image ? [info.image] : []);
+    window.aboutImageIndex = 0;
+
+    let imgHtml = '';
+    
+    let fallbackAboutSVG = (window.SVG_FALLBACK_ABOUT || `
+        <div class="w-full h-full absolute inset-0 bg-[#efe8d7] overflow-hidden flex items-center justify-center z-0">
+            <div class="absolute inset-0 opacity-10 bg-[linear-gradient(#cda568_1px,transparent_1px),linear-gradient(90deg,#cda568_1px,transparent_1px)] bg-[size:15px_15px]"></div>
+            <div class="relative flex items-center justify-center gap-2">
+                <div class="w-20 h-20 rounded-full border-[3px] border-[#cda568] bg-[#1c1612] flex items-center justify-center text-[#cda568] opacity-80 transform -rotate-12 translate-x-4 shadow-md"><span class="font-serif text-2xl font-bold">寶</span></div>
+                <div class="w-32 h-32 rounded-full border-[4px] border-[#cda568] bg-[#1c1612] flex items-center justify-center text-[#cda568] z-10 shadow-2xl"><span class="font-serif text-5xl font-bold">古</span></div>
+                <div class="w-24 h-24 rounded-full border-[3px] border-[#cda568] bg-[#1c1612] flex items-center justify-center text-[#cda568] opacity-90 transform rotate-12 -translate-x-4 shadow-lg"><span class="font-serif text-3xl font-bold">錢</span></div>
+            </div>
+        </div>`);
+
+    if (window.aboutImages.length > 0 && window.aboutImages[0].trim() !== '') {
+        let urls = window.getSafeImgUrls(window.aboutImages[0]);
+        imgHtml = `
+        <div class="relative w-full aspect-video shadow-lg rounded-sm border border-brand-border overflow-hidden bg-[#f8f5ee] min-h-[300px] group">
+            <img id="aboutMainImage" src="${urls.primary}" loading="lazy" class="absolute inset-0 w-full h-full object-contain p-2 z-10 cursor-pointer" onclick="window.viewFullImage(this.src)" title="Bấm để xem ảnh gốc" onerror="window.handleSafeImageLoadError(this, '${urls.fallback}')">
+            <div id="aboutSvgFallback" class="absolute inset-0 hidden items-center justify-center z-0">${fallbackAboutSVG}</div>
+            <button id="aboutPrevBtn" onclick="window.prevAboutImage()" class="absolute left-2 top-1/2 -translate-y-1/2 z-20 bg-black/40 hover:bg-brand-gold text-white p-2 rounded-full ${window.aboutImages.length > 1 ? '' : 'hidden'} transition">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clip-rule="evenodd" /></svg>
+            </button>
+            <button id="aboutNextBtn" onclick="window.nextAboutImage()" class="absolute right-2 top-1/2 -translate-y-1/2 z-20 bg-black/40 hover:bg-brand-gold text-white p-2 rounded-full ${window.aboutImages.length > 1 ? '' : 'hidden'} transition">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd" /></svg>
+            </button>
+            <div id="aboutImageCounter" class="absolute bottom-3 right-3 z-20 bg-black/50 text-white text-[10px] px-2 py-1 rounded-full ${window.aboutImages.length > 1 ? '' : 'hidden'} tracking-widest font-mono">1/${window.aboutImages.length}</div>
+        </div>`;
+    } else {
+        imgHtml = `
+        <div class="relative w-full aspect-[4/3] sm:aspect-video rounded-sm shadow-sm border border-brand-border bg-[#f8f5ee] flex flex-col items-center justify-center overflow-hidden min-h-[300px]">
+            ${fallbackAboutSVG}
+        </div>`;
+    }
+
+    let parasHtml = (info.paragraphs || []).map(p => {
+        let cleanP = p;
+        if(!cleanP.includes('<')) cleanP = cleanP.replace(/\n/g, '<br>');
+        return `<p class="text-gray-700 text-[15px] leading-relaxed mb-4 rich-text-display">${cleanP}</p>`;
+    }).join('');
+
+    let bulletsHtml = (info.bullets || []).map(b => `<li class="flex items-start gap-2 text-gray-700 text-[15px]">
+        <svg class="w-5 h-5 text-[#8c5a2b] mt-0.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+        <span class="rich-text-display">${b}</span>
+    </li>`).join('');
+
+    container.innerHTML = `
+        <div class="order-1 flex items-center justify-center">
+            ${imgHtml}
+        </div>
+        <div class="order-2 flex flex-col justify-center pl-0 md:pl-6">
+            <h3 class="text-xl md:text-2xl font-serif font-bold text-[#8c5a2b] mb-4">${info.title || 'Sứ Mệnh Bảo Tồn Lịch Sử'}</h3>
+            ${parasHtml}
+            <ul class="space-y-3 mt-2">${bulletsHtml}</ul>
+        </div>
+    `;
+};
+
+window.updateAboutImageDisplay = () => {
+    const imgEl = document.getElementById('aboutMainImage');
+    const svgEl = document.getElementById('aboutSvgFallback');
+    const counter = document.getElementById('aboutImageCounter');
+    
+    if (window.aboutImages.length > 0 && window.aboutImages[window.aboutImageIndex].trim() !== '') {
+        let urls = window.getSafeImgUrls(window.aboutImages[window.aboutImageIndex]);
+        imgEl.src = urls.primary;
+        imgEl.dataset.retried = ""; 
+        imgEl.onerror = function() {
+            if (!this.dataset.retried && urls.fallback) {
+                this.dataset.retried = 'true';
+                this.src = urls.fallback;
+            } else {
+                this.classList.add('hidden');
+                if (svgEl) svgEl.classList.remove('hidden');
+            }
+        };
+        imgEl.classList.remove('hidden');
+        if (svgEl) svgEl.classList.add('hidden');
+        if (counter) counter.innerText = `${window.aboutImageIndex + 1}/${window.aboutImages.length}`;
+    }
+};
+
+window.nextAboutImage = () => {
+    if (window.aboutImages.length <= 1) return;
+    window.aboutImageIndex = (window.aboutImageIndex + 1) % window.aboutImages.length;
+    window.updateAboutImageDisplay();
+};
+
+window.prevAboutImage = () => {
+    if (window.aboutImages.length <= 1) return;
+    window.aboutImageIndex = (window.aboutImageIndex - 1 + window.aboutImages.length) % window.aboutImages.length;
+    window.updateAboutImageDisplay();
+};
+
+window.renderContactData = function() {
+    const container = document.getElementById('contactContainer');
+    if (!container) return;
+    const contacts = window.globalAllContacts || [];
+    if (contacts.length === 0) return;
+
+    const formatContactValue = (key, rawValue) => {
+        const value = String(rawValue || '').trim();
+        const keyLower = String(key || '').toLowerCase();
+        const plainText = value.replace(/<[^>]*>/gm, '').trim();
+
+        if (keyLower.includes('email') || keyLower.includes('mail')) {
+            return `<a href="mailto:${plainText}" class="text-[#1c1612] hover:text-brand-gold transition-colors">${plainText}</a>`;
+        }
+
+        if (keyLower.includes('điện thoại') || keyLower.includes('phone') || keyLower.includes('hotline') || keyLower.includes('sđt')) {
+            const tel = plainText.replace(/[^\d+]/g, '');
+            return `<a href="tel:${tel}" class="text-[#1c1612] hover:text-brand-gold transition-colors">${plainText}</a>`;
+        }
+
+        const isLink = /(https?:\/\/|www\.|facebook\.com|m\.me|zalo\.me|fb\.me|telegram\.me)/i.test(plainText);
+        if (isLink) {
+            const href = plainText.startsWith('http') ? plainText : `https://${plainText}`;
+            return `<a href="${href}" target="_blank" rel="noopener noreferrer" class="text-[#1c1612] hover:text-brand-gold transition-colors">${plainText}</a>`;
+        }
+
+        return value.includes('<') ? value : value.replace(/\n/g, '<br>');
+    };
+
+    container.innerHTML = contacts
+        .filter(c => {
+            const k = c.key.toLowerCase();
+            return !(k.includes('theo dõi') || k.includes('followers') || k.includes('follow') || k.includes('lượt thích'));
+        })
+        .map(c => {
+        const val = formatContactValue(c.key, c.value);
+        
+        let iconSvg = '';
+        let k = c.key.toLowerCase();
+        
+        if (k.includes('địa chỉ') || k.includes('address')) {
+            iconSvg = `<i class="fa-solid fa-location-dot text-base"></i>`;
+        } else if (k.includes('điện thoại') || k.includes('phone') || k.includes('hotline') || k.includes('sđt')) {
+            iconSvg = `<i class="fa-solid fa-phone text-base"></i>`;
+        } else if (k.includes('email') || k.includes('mail')) {
+            iconSvg = `<i class="fa-solid fa-envelope text-base"></i>`;
+        } else if (k.includes('zalo')) {
+            iconSvg = `<i class="fa-solid fa-comment-dots text-base"></i>`;
+        } else if (k.includes('messenger') || k.includes('msg')) {
+            iconSvg = `<i class="fa-brands fa-facebook-messenger text-base"></i>`;
+        } else if (k.includes('facebook') || k.includes('fb')) {
+            iconSvg = `<i class="fa-brands fa-facebook-f text-base"></i>`;
+        } else if (k.includes('ghi chú') || k.includes('note') || k.includes('mở cửa') || k.includes('hours')) {
+            iconSvg = `<i class="fa-solid fa-clock text-base"></i>`;
+        } else {
+            iconSvg = `<i class="fa-solid fa-circle-question text-base"></i>`;
+        }
+
+        return `<li class="flex items-start gap-3 border-b border-gray-100 pb-3 last:border-0 last:pb-0">
+            <div class="w-8 h-8 rounded-full bg-[#efe8d7] flex items-center justify-center text-[#8c5a2b] flex-shrink-0 mt-1 shadow-sm">
+                ${iconSvg}
+            </div>
+            <div><strong class="block text-[#1c1612] mb-0.5">${c.key}</strong><span class="text-gray-600 rich-text-display">${val}</span></div>
+        </li>`;
+    }).join('');
+};
+
+window.updateDynamicFooter = function() {
+    const contacts = window.globalAllContacts || [];
+    
+    let address = '';
+    let phone = '';
+    let email = '';
+    let fbVal = '';
+    let zaloUrl = '';
+    let messengerUrl = '';
+    let globalFbFollowers = 'Theo dõi';
+
+    contacts.forEach(c => {
+        let k = c.key.toLowerCase();
+        let val = typeof window.stripHTMLForSearch === 'function' ? window.stripHTMLForSearch(c.value).trim() : c.value.replace(/<[^>]*>?/gm, '').trim();
+        const isUrl = /^(https?:\/\/|www\.)/i.test(val);
+        
+        if (k.includes('địa chỉ') || k.includes('address')) address = val;
+        else if (k.includes('điện thoại') || k.includes('phone') || k.includes('hotline') || k.includes('sđt')) {
+            phone = val;
+            let cleanPhone = phone.replace(/[^\d]/g, '');
+            zaloUrl = `https://zalo.me/${cleanPhone}`;
+        }
+        else if (k.includes('email') || k.includes('mail')) email = val;
+        else if (k.includes('facebook') || k.includes('fb')) {
+            if (isUrl) {
+                fbVal = val;
+            } else {
+                const count = parseInt(val.replace(/[^\d]/g, ''), 10);
+                if (!Number.isNaN(count)) {
+                    globalFbFollowers = `${new Intl.NumberFormat('vi-VN').format(count)} người theo dõi`;
+                }
+            }
+        }
+        else if (k.includes('zalo')) zaloUrl = val;
+        else if (k.includes('messenger') || k.includes('msg')) messengerUrl = val;
+
+        if ((k.includes('theo dõi') || k.includes('followers') || k.includes('follow') || k.includes('lượt thích')) && !isUrl) {
+            const count = parseInt(val.replace(/[^\d]/g, ''), 10);
+            if (!Number.isNaN(count)) {
+                globalFbFollowers = `${new Intl.NumberFormat('vi-VN').format(count)} người theo dõi`;
+            }
+        }
+    });
+
+    const headerHotline = document.getElementById('headerHotline');
+    if (headerHotline) headerHotline.innerText = phone;
+
+    const footerAddress = document.getElementById('footerAddress');
+    if (footerAddress) footerAddress.innerText = address;
+
+    const footerPhone = document.getElementById('footerPhone');
+    if (footerPhone) footerPhone.innerText = phone;
+
+    const footerEmail = document.getElementById('footerEmail');
+    if (footerEmail) {
+        footerEmail.innerText = email;
+        footerEmail.href = `mailto:${email}`;
+    }
+
+    const fbUrl = fbVal.startsWith('http') ? fbVal : `https://${fbVal}`;
+    const fbName = 'Văn Minh Việt Sử';
+    const fbFollowers = globalFbFollowers;
+    
+    document.querySelectorAll('.fb-dynamic-link').forEach(el => el.href = fbUrl);
+    document.querySelectorAll('.fb-dynamic-text').forEach(el => el.innerText = fbName);
+    document.querySelectorAll('.fb-dynamic-name').forEach(el => el.innerText = fbName);
+    const footerFbFollowers = document.getElementById('footerFbFollowers');
+    if (footerFbFollowers) footerFbFollowers.innerText = fbFollowers;
+
+    const footerBtnCall = document.getElementById('footerBtnCall');
+    if (footerBtnCall) footerBtnCall.href = `tel:${phone.replace(/[^\d]/g, '')}`;
+
+    const footerBtnZalo = document.getElementById('footerBtnZalo');
+    if (footerBtnZalo) footerBtnZalo.href = zaloUrl.startsWith('http') ? zaloUrl : `https://${zaloUrl}`;
+
+    const footerBtnMessenger = document.getElementById('footerBtnMessenger');
+    if (footerBtnMessenger) footerBtnMessenger.href = messengerUrl.startsWith('http') ? messengerUrl : `https://${messengerUrl}`;
+
+    let online = window.globalVisitors ? window.globalVisitors.online : (Math.floor(Math.random() * 5) + 2);
+    let today = window.globalVisitors ? window.globalVisitors.today : 0;
+    let yesterday = window.globalVisitors ? window.globalVisitors.yesterday : 0;
+    let total = window.globalVisitors ? window.globalVisitors.total : 0;
+
+    const elOnline = document.getElementById('stat-online');
+    const elToday = document.getElementById('stat-today');
+    const elYesterday = document.getElementById('stat-yesterday');
+    const elTotal = document.getElementById('stat-total');
+
+    if(elOnline) elOnline.innerText = online;
+    if(elToday) elToday.innerText = new Intl.NumberFormat('vi-VN').format(today);
+    if(elYesterday) elYesterday.innerText = new Intl.NumberFormat('vi-VN').format(yesterday);
+    if(elTotal) elTotal.innerText = new Intl.NumberFormat('vi-VN').format(total);
+
+    // XỬ LÝ LẤY TIN TỨC DYNAMIC Ở FOOTER
+    const footerNewsList = document.getElementById('footerNewsList');
+    if (footerNewsList) {
+        const newsItems = window.globalNews || [];
+        if (newsItems.length > 0) {
+            footerNewsList.innerHTML = newsItems.slice(0, 3).map(n => `
+                <li><a href="#" onclick="window.switchPage('news'); window.openNewsDetail('${n.id}'); return false;" class="hover:text-brand-gold transition-colors block line-clamp-2" title="${n.title}">› ${n.title}</a></li>
+            `).join('');
+        }
+    }
+};
+
+window.renderProfilePage = function() {
+    if (!window.loggedCustomer) return;
+    
+    document.getElementById('profileName').innerText = window.loggedCustomer.name;
+    document.getElementById('profileAvatar').innerText = window.loggedCustomer.name.charAt(0).toUpperCase();
+    document.getElementById('profilePhone').innerText = window.loggedCustomer.phone;
+    
+    if (window.loggedCustomer.level) {
+        document.getElementById('profileLevelBadge').innerText = window.loggedCustomer.level;
+        document.getElementById('profileLevelBadge').classList.remove('hidden');
+    } else {
+        document.getElementById('profileLevelBadge').classList.add('hidden');
+    }
+
+    let emailHtml = window.loggedCustomer.email ? window.loggedCustomer.email.split('\n').filter(Boolean).map(e => `<span class="bg-gray-100 px-2 py-0.5 rounded text-gray-700 font-medium">${e}</span>`).join('') : "Chưa cập nhật";
+    let addressHtml = window.loggedCustomer.address ? window.loggedCustomer.address.split('\n').filter(Boolean).map(a => `<span class="bg-gray-100 px-2 py-1 rounded text-gray-700 font-medium">${a}</span>`).join('') : "Chưa cập nhật";
+
+    document.getElementById('profileEmail').innerHTML = emailHtml;
+    document.getElementById('profileAddress').innerHTML = addressHtml;
+
+    const ordersContainer = document.getElementById('profileOrdersContainer');
+    ordersContainer.innerHTML = '<div class="loader mx-auto"></div><p class="text-center mt-2 text-sm text-gray-500">Đang tải lịch sử...</p>';
+
+    setTimeout(() => {
+        const queryPhone = window.loggedCustomer.phone;
+        const matchedOrders = (window.globalOrders || []).filter(o => o.phone === queryPhone);
+
+        if (matchedOrders.length === 0) {
+            ordersContainer.innerHTML = `
+                <div class="bg-gray-50 border border-gray-200 text-gray-500 rounded-md p-8 w-full text-center shadow-sm">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 mx-auto mb-3 opacity-50" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" /></svg>
+                    <p class="font-bold">Bạn chưa có đơn hàng nào.</p>
+                    <button onclick="window.switchPage('products')" class="mt-4 bg-brand-dark text-brand-gold px-6 py-2 rounded-full text-sm font-bold">Khám phá Sản phẩm</button>
+                </div>`;
+            return;
+        }
+
+        let resultHtml = "";
+        matchedOrders.forEach(o => {
+            let statusColor = o.status === 'Đã Giao Hàng' ? 'text-green-700 bg-green-50 border-green-200' : (o.status === 'Đang Giao Hàng' ? 'text-blue-700 bg-blue-50 border-blue-200' : 'text-orange-700 bg-orange-50 border-orange-200');
+            let rawMethod = o.method || '';
+            let displayMethod = rawMethod;
+            let payColor = rawMethod.includes('Đã nhận') ? 'text-green-600' : 'text-red-600';
+            if (rawMethod.toUpperCase().includes('BANK')) { displayMethod = 'Chuyển Khoản'; } 
+            else if (rawMethod.toUpperCase() === 'COD') { displayMethod = 'COD'; payColor = 'text-gray-600'; }
+
+            let pNames = (o.product || "").toString().split('\n');
+            let pQtys = (o.qty || "").toString().split(/,|\n/); 
+            
+            let itemsHtml = pNames.map((name, i) => {
+                let q = pQtys[i] ? parseInt(pQtys[i].toString().trim()) || 1 : 1;
+                let nameStr = name.includes('SL:') ? name.trim() : `SL: ${q} x ${name.trim()}`;
+                return `<li class="text-sm text-gray-700 py-1">${nameStr}</li>`;
+            }).join('');
+
+            resultHtml += `
+            <div class="bg-white border border-gray-200 p-5 rounded-md shadow-sm relative">
+                <div class="absolute top-5 right-5 text-[11px] font-bold px-2 py-1 rounded border ${statusColor} uppercase">${o.status || 'Chưa Giao Hàng'}</div>
+                <div class="mb-3 border-b border-gray-100 pb-3 pr-24">
+                    <p class="text-brand-dark font-bold text-lg leading-none">${o.order_code}</p>
+                    <p class="text-xs text-gray-500 mt-1">${o.date}</p>
+                </div>
+                <ul class="mb-3 list-disc list-inside border-b border-gray-100 pb-3">${itemsHtml}</ul>
+                <div class="flex justify-between items-end">
+                    <div>
+                        <p class="text-[11px] uppercase tracking-wider text-gray-500 font-bold mb-1">Thanh toán</p>
+                        <p class="text-xs font-bold ${payColor}">${displayMethod}</p>
+                    </div>
+                    <p class="font-bold text-red-700 font-sans text-xl">${o.total}</p>
+                </div>
+            </div>`;
+        });
+        ordersContainer.innerHTML = resultHtml;
+    }, 500);
+};

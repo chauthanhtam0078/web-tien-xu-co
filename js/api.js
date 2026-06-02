@@ -64,6 +64,8 @@ window.applyDataToGlobals = function(data) {
     if (data.vouchers) window.globalVouchers = data.vouchers; 
     else window.globalVouchers = [];
     
+    if (data.allFeedback) window.globalAllFeedback = data.allFeedback;
+    if (data.logs) window.globalLogs = data.logs;
     if (data.visitors) window.globalVisitors = data.visitors;
     
     if (data.users) {
@@ -94,9 +96,8 @@ window.applyDataToGlobals = function(data) {
     try { globalAdmins = window.globalAdmins; } catch(e){}
 };
 
-// --- 5. TẢI DỮ LIỆU TỪ SERVER VÀ RENDER ---
-window.fetchAllData = async function() {
-    // Kiểm tra cấu hình API
+// --- 5. TẢI DỮ LIỆU TỪ SERVER (HỖ TRỢ BACKGROUND FETCH) ---
+window.fetchAllData = async function(isBackground = false) {
     if (typeof SCRIPT_URL === 'undefined' || SCRIPT_URL.includes('AKfycbyc9b2iKk') || SCRIPT_URL.includes('DÁN_ĐƯỜNG_LINK')) {
         console.warn("Chưa cấu hình SCRIPT_URL");
         return;
@@ -104,17 +105,22 @@ window.fetchAllData = async function() {
 
     const cached = localStorage.getItem('tienxu_cached_webdata');
     if (cached) {
-        try {
-            window.applyDataToGlobals(JSON.parse(cached));
-            window.finishLoading();
-        } catch(e) {
+        const parsedCached = window.safeParseJSON(cached, null);
+        if (parsedCached) {
+            window.applyDataToGlobals(parsedCached);
+            if (!isBackground) window.finishLoading();
+        } else {
             console.log("Dữ liệu đệm lỗi, tiến hành tải mới hoàn toàn.");
         }
     } else {
-        let loadingEl = document.getElementById('loadingIndicator');
-        let publicEl = document.getElementById('publicContainer');
-        if(loadingEl) loadingEl.classList.remove('hidden');
-        if(publicEl) publicEl.classList.add('hidden');
+        if (!isBackground) {
+            let loadingEl = document.getElementById('loadingIndicator');
+            let publicEl = document.getElementById('publicContainer');
+            let adminEl = document.getElementById('adminSection');
+            if(loadingEl) loadingEl.classList.remove('hidden');
+            if(publicEl) publicEl.classList.add('hidden');
+            if(adminEl) adminEl.classList.add('hidden');
+        }
     }
 
     try {
@@ -124,22 +130,54 @@ window.fetchAllData = async function() {
         localStorage.setItem('tienxu_cached_webdata', JSON.stringify(data));
         window.applyDataToGlobals(data);
         
-        window.finishLoading();
+        if (!isBackground) {
+            window.finishLoading();
+        } else {
+            // Update UI silently if already rendered
+            if (typeof window.renderPublicGrid === 'function' && document.getElementById('publicContainer') && !document.getElementById('publicContainer').classList.contains('hidden')) window.renderPublicGrid(); 
+            // CẬP NHẬT TỨC THÌ: Lấy xong data mới nhất phải push lên giao diện footer để hiển thị Thống kê truy cập (Fix 3)
+            if (typeof window.updateDynamicFooter === 'function') window.updateDynamicFooter();
+
+            // Nếu đang trong trang admin
+            if (typeof window.buildAdminInterface === 'function' && typeof isAdminActive !== 'undefined' && isAdminActive) {
+                const activeTab = document.querySelector('.admin-tab.active');
+                if (activeTab) {
+                    const tabId = activeTab.id.replace('tab', '');
+                    if(tabId === 'Products' && typeof renderAdminProducts === 'function') renderAdminProducts();
+                    if(tabId === 'Orders' && typeof renderAdminOrders === 'function') renderAdminOrders();
+                    if(tabId === 'Users' && typeof renderAdminUsers === 'function') renderAdminUsers();
+                    if(tabId === 'Logs' && typeof renderAdminLogs === 'function') renderAdminLogs();
+                    if(tabId === 'Dashboard' && typeof renderDashboard === 'function') renderDashboard();
+                    if(tabId === 'Vouchers' && typeof renderAdminVouchers === 'function') renderAdminVouchers();
+                }
+                
+                // Cập nhật lại số lượng sản phẩm trên Badge Admin (nếu có)
+                const countBadge = document.getElementById('productCountBadge');
+                if (countBadge && window.globalProducts) countBadge.innerText = window.globalProducts.length;
+            }
+        }
 
     } catch (error) {
         console.error("Lỗi fetch data từ server:", error);
     }
 };
 
+window.fetchAllDataBackground = function() {
+    window.fetchAllData(true);
+};
+
 // --- 6. HÀM KẾT THÚC TẢI VÀ RENDER GIAO DIỆN ---
 window.finishLoading = function() {
     let loadingEl = document.getElementById('loadingIndicator');
     let publicEl = document.getElementById('publicContainer');
+    let adminEl = document.getElementById('adminSection');
     
     if(loadingEl) loadingEl.classList.add('hidden');
     
     // Nếu không phải trang admin đang mở thì hiện public content
-    if(publicEl && !(typeof isAdminActive !== 'undefined' && isAdminActive)) {
+    if(typeof isAdminActive !== 'undefined' && isAdminActive) {
+        if(adminEl) adminEl.classList.remove('hidden');
+    } else if(publicEl) {
         publicEl.classList.remove('hidden');
     }
 

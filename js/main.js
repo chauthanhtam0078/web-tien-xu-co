@@ -17,15 +17,18 @@ function debounce(func, wait) {
 document.addEventListener('DOMContentLoaded', () => {
     // 1. Phục hồi giỏ hàng
     const savedCart = localStorage.getItem('tienxu_cart');
-    if(savedCart) { window.cart = JSON.parse(savedCart); updateCartBadge(); }
+    const parsedCart = window.safeParseJSON(savedCart, []);
+    if (Array.isArray(parsedCart) && parsedCart.length > 0) { window.cart = parsedCart; updateCartBadge(); }
     
     // 2. Phục hồi trạng thái đăng nhập Admin
     const savedAdmin = localStorage.getItem('tienxu_admin');
-    if(savedAdmin) { loggedInUser = JSON.parse(savedAdmin); }
+    const parsedAdmin = window.safeParseJSON(savedAdmin, null);
+    if (parsedAdmin) { loggedInUser = parsedAdmin; }
 
     // Cập nhật mới: Phục hồi trạng thái đăng nhập Customer
     const savedCustomer = localStorage.getItem('tienxu_customer');
-    if(savedCustomer) { window.loggedCustomer = JSON.parse(savedCustomer); }
+    const parsedCustomer = window.safeParseJSON(savedCustomer, null);
+    if (parsedCustomer) { window.loggedCustomer = parsedCustomer; }
 
     // 3. Khởi tạo mã QR động
     const nameInput = document.querySelector('input[name="customer_name"]');

@@ -114,8 +114,12 @@ window.renderCartItems = () => {
         let formatCurr = typeof window.formatCurrency === 'function' ? window.formatCurrency : (v) => v.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".") + 'đ';
         total += finalPrice * item.quantity;
         
-        let imgHtml = item.images && item.images.length > 0 && item.images[0] !== '' ? 
-            `<img src="${item.images[0]}" class="w-16 h-16 object-contain bg-[#f8f5ee] rounded border border-brand-border">` : 
+        let firstImg = item.images && item.images.length > 0 ? item.images[0] : '';
+        let safeUrls = window.getSafeImgUrls(firstImg);
+        
+        let imgHtml = safeUrls.primary !== '' ? 
+            `<img src="${safeUrls.primary}" onerror="window.handleSafeImageLoadError(this, '${safeUrls.fallback}')" class="w-16 h-16 object-cover bg-[#f8f5ee] rounded border border-brand-border">
+             <div class="w-16 h-16 rounded border border-brand-border bg-[#f8f5ee] hidden items-center justify-center text-xl font-bold text-brand-gold">${item.symbol || '古'}</div>` : 
             `<div class="w-16 h-16 rounded border border-brand-border bg-[#f8f5ee] flex items-center justify-center text-xl font-bold text-brand-gold">${item.symbol || '古'}</div>`;
 
         let html = `
@@ -166,8 +170,13 @@ window.renderOrderSummary = () => {
         
         let formattedPrice = formatCurr(finalP);
         let qtyLabel = `<span class="text-xs bg-gray-200 text-gray-700 px-1.5 rounded-sm">x${qty}</span>`;
-        let imgHtml = item.images && item.images.length > 0 && item.images[0] !== '' ? 
-            `<img src="${item.images[0]}" class="w-10 h-10 object-contain bg-white rounded border border-gray-200">` : 
+        
+        let firstImg = item.images && item.images.length > 0 ? item.images[0] : '';
+        let safeUrls = window.getSafeImgUrls(firstImg);
+        
+        let imgHtml = safeUrls.primary !== '' ? 
+            `<img src="${safeUrls.primary}" onerror="window.handleSafeImageLoadError(this, '${safeUrls.fallback}')" class="w-10 h-10 object-cover bg-white rounded border border-gray-200">
+             <div class="w-10 h-10 rounded border border-gray-200 bg-white hidden items-center justify-center text-xs font-bold text-brand-gold">${item.symbol || '古'}</div>` : 
             `<div class="w-10 h-10 rounded border border-gray-200 bg-white flex items-center justify-center text-xs font-bold text-brand-gold">${item.symbol || '古'}</div>`;
         
         let html = `

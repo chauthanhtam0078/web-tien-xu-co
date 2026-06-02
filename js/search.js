@@ -10,11 +10,12 @@ window.executeSearch = () => {
         return;
     }
 
-    // SẮP XẾP ƯU TIÊN SẢN PHẨM CÓ CHIẾT KHẤU CAO LÊN ĐẦU
+    // SẮP XẾP ƯU TIÊN SẢN PHẨM CÓ CHIẾT KHẤU CAO LÊN ĐẦU, ĐỒNG THỜI MỞ RỘNG TÌM KIẾM THEO KÝ TỰ (SYMBOL)
     const matchedProducts = (window.globalProducts || []).filter(p => 
         (p.name && p.name.toLowerCase().includes(query)) || 
         (p.desc && window.stripHTMLForSearch(p.desc).toLowerCase().includes(query)) ||
-        (p.period && p.period.toLowerCase().includes(query))
+        (p.period && p.period.toLowerCase().includes(query)) ||
+        (p.symbol && p.symbol.toLowerCase().includes(query)) // Bổ sung tìm kiếm theo chữ (Bảo, Thông, Tự...)
     ).sort((a, b) => {
         const discountA = typeof window.getDiscountPercent === 'function' ? window.getDiscountPercent(a.discount) : 0;
         const discountB = typeof window.getDiscountPercent === 'function' ? window.getDiscountPercent(b.discount) : 0;
@@ -44,7 +45,8 @@ function renderSearchResults(query, matchedProducts, matchedNews) {
     } else {
         productGrid.innerHTML = '';
         matchedProducts.forEach((p, index) => {
-            let firstImage = (p.images && p.images.length > 0 && p.images[0].trim() !== '') ? p.images[0] : '';
+            const firstImage = (p.images && p.images.length > 0 && p.images[0].trim() !== '') ? p.images[0] : '';
+            const imgUrls = window.getSafeImgUrls(firstImage);
             
             const finalPrice = typeof window.calculateFinalPrice === 'function' ? window.calculateFinalPrice(p.price, p.discount) : (parseInt(p.price.replace(/[^\d]/g, '')) || 0);
             const discountVal = typeof window.getDiscountPercent === 'function' ? window.getDiscountPercent(p.discount) : 0;
@@ -64,8 +66,8 @@ function renderSearchResults(query, matchedProducts, matchedNews) {
 
             let voucherBadge = (p.vouchers && p.vouchers.trim() !== '') ? `<div class="absolute bottom-2 left-2 bg-red-50 text-red-600 border border-red-200 text-[10px] font-bold px-2 py-0.5 rounded-sm z-20 shadow-sm flex items-center gap-1">🎟️ ${p.vouchers}</div>` : '';
 
-            let imageHTML = firstImage !== '' 
-                ? `<img src="${firstImage}" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';" alt="${p.name}" class="absolute inset-0 w-full h-full object-cover bg-white group-hover:scale-105 transition-transform duration-500 z-10">
+            let imageHTML = imgUrls.primary !== '' 
+                ? `<img src="${imgUrls.primary}" onerror="window.handleSafeImageLoadError(this, '${imgUrls.fallback}')" alt="${p.name}" class="absolute inset-0 w-full h-full object-cover bg-white group-hover:scale-105 transition-transform duration-500 z-10">
                    <div class="absolute inset-0 hidden items-center justify-center z-0 group-hover:scale-105 transition-transform duration-500">${fallbackSVG}</div>` 
                 : fallbackSVG;
 
@@ -113,10 +115,11 @@ function renderSearchResults(query, matchedProducts, matchedNews) {
                     
         newsGrid.innerHTML = matchedNews.map(n => {
             let cleanNewsDescPreview = window.stripHTMLForSearch(n.desc);
+            const newsImgUrls = window.getSafeImgUrls(n.image);
             return `
             <div class="w-full md:w-[calc(33.333%_-_1.333rem)] xl:w-[calc(25%_-_1.5rem)] bg-white border border-gray-200 rounded-sm overflow-hidden hover:shadow-md transition group cursor-pointer flex flex-col" onclick="window.openNewsDetail('${n.id}')">
                 <div class="w-full aspect-video bg-[#f8f5ee] relative overflow-hidden flex items-center justify-center border-b border-brand-border">
-                    ${n.image ? `<img src="${n.image}" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';" class="w-full h-full object-cover group-hover:scale-105 transition duration-500 absolute inset-0 z-10"><div class="absolute inset-0 hidden items-center justify-center z-0">${fallbackNewsSVG}</div>` : fallbackNewsSVG}
+                    ${newsImgUrls.primary ? `<img src="${newsImgUrls.primary}" onerror="window.handleSafeImageLoadError(this, '${newsImgUrls.fallback}')" class="w-full h-full object-cover group-hover:scale-105 transition duration-500 absolute inset-0 z-10"><div class="absolute inset-0 hidden items-center justify-center z-0">${fallbackNewsSVG}</div>` : fallbackNewsSVG}
                 </div>
                 <div class="p-5 flex-grow text-center"><span class="text-xs text-[#d5a044] font-bold uppercase mb-2 block">${n.category}</span><h4 class="font-bold text-lg mb-2 group-hover:text-[#8c5a2b] transition">${n.title}</h4><p class="text-gray-600 text-sm line-clamp-3">${cleanNewsDescPreview}</p></div>
             </div>`

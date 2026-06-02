@@ -4,7 +4,7 @@
 // ============================================================================
 
 // 1. CẤU HÌNH API URL GIAO TIẾP VỚI SERVER
-const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbynXbCM1xZ15CBEM_xu7K56wjerTyGQInoaDktm3yyn8upOghwD3rX9SHCEiTGxK4h0-w/exec';
+const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbywDAUo_9WlK1B1zcG37QFKTfIwz03sBk2U7dfeD0IoeiC3PplWJs-s_CaQWZOBDz9Akw/exec';
 
 // 2. KHAI BÁO BIẾN STATE TOÀN CỤC (Gắn thẳng vào window để chống mọi lỗi đụng độ)
 window.globalProducts = [];
@@ -13,11 +13,13 @@ window.globalAbout = {};
 window.globalContact = {};
 window.globalAllNews = [];
 window.globalAllContacts = [];
+window.globalAllFeedback = [];
 window.globalAdmins = [];
 window.globalUsers = [];
 window.globalOrders = [];
 window.filteredProducts = null;
 window.globalVouchers = [];
+window.globalLogs = [];
 window.globalVisitors = { online: 0, today: 0, yesterday: 0, total: 0 };
 
 // 3. CÁC BIẾN QUẢN LÝ TRẠNG THÁI GIAO DIỆN (ADMIN)
@@ -36,6 +38,7 @@ window.PERMISSION_MAP = {
     'Vouchers': { id: 'Vouchers', label: '🎟️ Mã Giảm Giá' },
     'News': { id: 'News', label: '📰 Tin Tức' },
     'Info': { id: 'Info', label: 'ℹ️ Giới Thiệu' },
-    'Contact': { id: 'Contact', label: '📞 Liên Hệ' },
+    'Contact': { id: 'Contact', label: '📞 Thông Tin' },
+    'Feedback': { id: 'Feedback', label: '💬 Phản Ánh' },
     'Admin': { id: 'Admin', label: '⚙️ Phân Quyền' }
 };
