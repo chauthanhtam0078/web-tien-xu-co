@@ -1,7 +1,6 @@
 // ============================================================================
 // 📁 MODULE 4.3: UI CUSTOMER (ui-customer.js)
-// Cổng Thành Viên: Đăng nhập/Đăng ký/Đăng xuất, Sửa profile,
-// Form liên hệ/phản ánh
+// Cổng Thành Viên: Đăng nhập/Đăng ký/Đăng xuất, Sửa profile, Form liên hệ/phản ánh
 // ============================================================================
 
 window.handleCustomerIconClick = function() {
@@ -62,6 +61,8 @@ window.submitCustomerLogin = async function(e) {
         if (result.success) {
             window.loggedCustomer = result.user;
             localStorage.setItem('tienxu_customer', JSON.stringify(result.user));
+            // Lưu lại token bảo mật người dùng
+            if(result.userToken) localStorage.setItem('tienxu_customer_token', result.userToken); 
             window.showToast("Đăng nhập thành công!", "success");
             window.closeCustomerModal();
             window.switchPage('profile');
@@ -117,6 +118,8 @@ window.submitCustomerRegister = async function(e) {
         if (result.success) {
             window.loggedCustomer = result.user;
             localStorage.setItem('tienxu_customer', JSON.stringify(result.user));
+            // Lưu lại token bảo mật người dùng
+            if(result.userToken) localStorage.setItem('tienxu_customer_token', result.userToken);
             window.showToast("Đăng ký thành công!", "success");
             window.closeCustomerModal();
             window.switchPage('profile');
@@ -133,6 +136,7 @@ window.submitCustomerRegister = async function(e) {
 window.logoutCustomer = function() {
     window.loggedCustomer = null;
     localStorage.removeItem('tienxu_customer');
+    localStorage.removeItem('tienxu_customer_token'); // Xóa token bảo mật
     window.showToast("Đã đăng xuất", "success");
     window.switchPage('home');
 };
@@ -208,10 +212,14 @@ window.submitProfileEdit = async function(e) {
     
     textSpan.innerText = "ĐANG LƯU..."; btn.disabled = true; spinner.classList.remove('hidden');
 
+    // Lấy Token bảo mật gửi kèm xác thực
+    const userToken = localStorage.getItem('tienxu_customer_token'); 
+
     const data = {
         phone: window.loggedCustomer.phone,
         email: emails.join('\n'),
-        address: addresses.join('\n')
+        address: addresses.join('\n'),
+        userToken: userToken // Truyền Token vào payload
     };
 
     try {
