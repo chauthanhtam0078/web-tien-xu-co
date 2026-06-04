@@ -24,13 +24,20 @@ window.closeLoginModal = () => { document.getElementById('loginModal').classList
 
 window.submitLogin = async (e) => {
     e.preventDefault();
+    const u = document.getElementById('loginUsername').value.trim(); 
+    const p = document.getElementById('loginPassword').value.trim();
+    
+    // --- BẢO MẬT: Validation Frontend trước khi call API ---
+    if (!u || !p) {
+        if(typeof window.showToast === 'function') window.showToast("Vui lòng nhập đầy đủ tên đăng nhập và mật khẩu!", "error");
+        return;
+    }
+    // --------------------------------------------------------
+
     const btn = e.target.querySelector('button[type="submit"]');
     const spinner = btn.querySelector('.spinner-icon');
     btn.disabled = true; spinner.classList.remove('hidden');
 
-    const u = document.getElementById('loginUsername').value.trim(); 
-    const p = document.getElementById('loginPassword').value.trim();
-    
     try {
         const response = await fetch(SCRIPT_URL, { method: 'POST', redirect: 'follow', body: JSON.stringify({ action: 'login', data: { username: u, password: p } }) });
         const result = await response.json();
@@ -174,7 +181,7 @@ window.buildAdminInterface = function() {
                     <div><label class="block text-xs font-bold text-gray-600 mb-1">Mã Giảm Giá SP Hỗ Trợ</label><input type="text" id="addVouchersAllowed" placeholder="VD: GIAM50K, TET2026" class="w-full px-3 py-2 border border-brand-border outline-none text-xs rounded-sm"></div>
                     <div><label class="block text-xs font-bold text-gray-600 mb-1">Phí Giao Hàng</label><input type="text" id="addShippingFee" placeholder="VD: 30000 hoặc 30.000đ" class="w-full px-3 py-2 border border-brand-border outline-none text-xs rounded-sm"></div>
                 </div>
-                <div class="mt-4 mb-4"><label class="block text-xs font-bold text-gray-600 mb-1">Thông Tin Khác</label><input type="text" id="addOtherInfo" class="w-full px-3 py-2 border border-brand-border outline-none text-xs rounded-sm"></div>
+                <div class="mt-4 mb-4"><label class="block text-xs font-bold text-gray-600 mb-1">Thông Thông Khác</label><input type="text" id="addOtherInfo" class="w-full px-3 py-2 border border-brand-border outline-none text-xs rounded-sm"></div>
             `;
             addForm.insertBefore(newFields, btnSubmit);
         }
